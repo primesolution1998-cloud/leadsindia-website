@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en-IN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads India Properties | Verified Direct Owner Homes in Mumbai, Delhi, Bengaluru & Top Metros</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Discover verified residential flats and commercial properties across India's top metros with direct owner contacts. 100% Zero Brokerage. Buy Capped Contact Passes (₹499 for 5 contacts) and get instant 8.35% linked home loan approvals.">
+    <meta name="keywords" content="verified properties Mumbai, direct owner flats Mumbai MMR, zero brokerage apartments Delhi NCR, owner contact real estate Bengaluru, NoBroker alternative, Magicbricks owner properties, Leads India Properties">
+    <meta name="author" content="Leads India Real Estate Network">
+    <link rel="canonical" href="https://leadsindia.in/properties.html">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Leads India Properties | Zero Brokerage Direct Owner Homes">
+    <meta property="og:description" content="Connect directly with verified property owners in Mumbai MMR, Delhi NCR, Bengaluru, Pune & beyond. 100% Zero Brokerage.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&auto=format&fit=crop&q=80">
+    <meta property="og:url" content="https://leadsindia.in/properties.html">
+    <meta property="og:type" content="website">
+
+    <!-- Schema Markup JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "RealEstateAgent",
+          "@id": "https://leadsindia.in/properties.html#agent",
+          "name": "Leads India Properties",
+          "alternateName": "Leads India Direct Owner Real Estate Marketplace",
+          "url": "https://leadsindia.in/properties.html",
+          "telephone": "+919145597951",
+          "priceRange": "₹499 - ₹1,999 (Owner Contact Passes)",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Vasai East",
+            "addressLocality": "Mumbai",
+            "addressRegion": "Maharashtra",
+            "postalCode": "401208",
+            "addressCountry": "IN"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://leadsindia.in/#website",
+          "url": "https://leadsindia.in/",
+          "name": "Leads India"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        prop: {
+                            navy: '#030712',
+                            dark: '#0a0f1d',
+                            card: '#0f172a',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            blue: '#3b82f6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-prop-navy text-slate-100 min-h-screen flex flex-col selection:bg-emerald-600 selection:text-white font-sans">
+
+    <!-- Top Sticky Header -->
+    <header class="sticky top-0 z-50 bg-prop-navy/95 backdrop-blur-md border-b border-white/10 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-emerald-500/30">
+                    LI
+                </div>
+                <div>
+                    <span class="text-xl font-black tracking-tight text-white block">LEADS INDIA</span>
+                    <span class="text-[10px] uppercase tracking-widest text-emerald-400 font-bold block">Verified Direct Properties</span>
+                </div>
+            </a>
+
+            <!-- Nav Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
+                <a href="index.html" class="text-slate-300 hover:text-white transition-colors">Home</a>
+                <a href="loans.html" class="text-slate-300 hover:text-white transition-colors">Compare Loans</a>
+                <a href="properties.html" class="text-emerald-400 font-bold flex items-center gap-1.5">
+                    <span>Direct Properties</span>
+                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">0% Brokerage</span>
+                </a>
+                <a href="software.html" class="text-slate-300 hover:text-white transition-colors">Software Hub (28)</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-400">
+                    <span>Your Credits:</span>
+                    <span id="navCreditsCount" class="font-black text-white text-sm">0</span>
+                </div>
+                <a href="#pricing-packs" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-lg shadow-emerald-600/25">
+                    Recharge Contacts
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Top Pinned Metro Cities Selector Bar -->
+    <div class="bg-prop-dark/95 border-b border-white/10 py-3 px-4 sticky top-[69px] z-40 backdrop-blur-md overflow-x-auto no-scrollbar">
+        <div class="max-w-7xl mx-auto flex items-center gap-2 text-xs font-bold">
+            <span class="text-emerald-400 uppercase tracking-wider text-[11px] whitespace-nowrap mr-2 flex items-center gap-1">
+                <span>📍</span> TOP METROS:
+            </span>
+            <button onclick="filterCity('All India')" class="city-btn px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white whitespace-nowrap transition-all shadow-md shadow-emerald-600/30" data-city="All India">🇮🇳 All India</button>
+            <button onclick="filterCity('Mumbai MMR')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Mumbai MMR">🏢 Mumbai MMR</button>
+            <button onclick="filterCity('Delhi NCR')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Delhi NCR">🏛️ Delhi-NCR</button>
+            <button onclick="filterCity('Bengaluru')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Bengaluru">💻 Bengaluru</button>
+            <button onclick="filterCity('Hyderabad')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Hyderabad">💎 Hyderabad</button>
+            <button onclick="filterCity('Pune')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Pune">⚡ Pune</button>
+            <button onclick="filterCity('Chennai')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Chennai">🌊 Chennai</button>
+            <button onclick="filterCity('Kolkata')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Kolkata">🌉 Kolkata</button>
+            <button onclick="filterCity('Ahmedabad')" class="city-btn px-3.5 py-1.5 rounded-xl bg-prop-card text-slate-300 hover:text-white border border-white/10 whitespace-nowrap transition-all" data-city="Ahmedabad">🏭 Ahmedabad</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="py-12 lg:py-16 text-center max-w-5xl mx-auto px-4">
+        <span class="inline-block bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-4">
+            🛡️ Zero Broker Spam • Verified Direct Owners Only
+        </span>
+        <h1 class="text-3xl md:text-5xl font-black text-white mb-4 leading-tight">
+            Find Verified Homes with <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Direct Owner Numbers</span>
+        </h1>
+        <p class="text-slate-400 text-sm md:text-base max-w-2xl mx-auto mb-8">
+            Skip ₹50,000+ broker commissions. Unlock direct verified property owner contacts across India's top metros, and get pre-approved home loans @ <strong>8.35% p.a.</strong> in 1 click.
+        </p>
+
+        <!-- Search Bar -->
+        <div class="max-w-2xl mx-auto">
+            <div class="relative">
+                <input type="text" id="propertySearchInput" onkeyup="filterProperties()" placeholder="Search by locality, project, or BHK (e.g. Vasai, Mira Road, Whitefield, 2 BHK)..." class="w-full bg-prop-card border border-white/15 focus:border-emerald-500 rounded-2xl py-3.5 pl-12 pr-4 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none shadow-xl">
+                <span class="absolute left-4 top-3.5 text-slate-400">🔍</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION: Property Grid -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 flex-1">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-lg font-black text-white flex items-center gap-2">
+                <span>Featured Properties in</span>
+                <span id="activeCityTitle" class="text-emerald-400">All India</span>
+            </h2>
+            <span class="text-xs text-slate-400"><strong id="propertyCountBadge">6</strong> Listings Available</span>
+        </div>
+
+        <div id="propertyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Rendered by JS -->
+        </div>
+    </main>
+
+    <!-- SECTION: Capped Contact Packs (Pricing) -->
+    <section id="pricing-packs" class="py-16 bg-prop-dark/80 border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 block mb-2">Capped Contact Credit Packs</span>
+                <h2 class="text-2xl md:text-4xl font-black text-white">Unlock Verified Owner Contacts</h2>
+                <p class="text-slate-400 text-xs sm:text-sm mt-2">Zero broker fees. Transparent pay-per-contact credits with instant UPI delivery.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Starter Pack -->
+                <div class="bg-prop-card rounded-3xl p-6 border border-white/10 flex flex-col justify-between hover:border-emerald-500/40 transition-all">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Starter Pack</span>
+                        <h3 class="text-xl font-extrabold text-white mt-3 mb-1">5 Owner Contacts</h3>
+                        <p class="text-xs text-slate-400 mb-4">Ideal for buyers focused on 1 specific locality.</p>
+                        
+                        <div class="text-3xl font-black text-white font-mono mb-6">₹499 <span class="text-xs text-slate-400 font-sans font-normal">/ 30 Days</span></div>
+
+                        <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 5 Direct Verified Owner Numbers</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> WhatsApp Direct Chat Links</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Zero Brokerage Guarantee</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Cost per contact: ~₹99 only</li>
+                        </ul>
+                    </div>
+                    <button onclick="openPassModal('Starter Pass', 499, 5)" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 transition-all">
+                        Buy 5 Contacts (₹499)
+                    </button>
+                </div>
+
+                <!-- Pro Pack (Most Popular) -->
+                <div class="bg-prop-card rounded-3xl p-6 border-2 border-emerald-500/60 shadow-2xl shadow-emerald-500/10 flex flex-col justify-between relative">
+                    <span class="absolute -top-3.5 right-6 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-full shadow">MOST POPULAR</span>
+                    <div>
+                        <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Pro Buyer Pass</span>
+                        <h3 class="text-xl font-extrabold text-white mt-3 mb-1">15 Owner Contacts</h3>
+                        <p class="text-xs text-slate-400 mb-4">For active buyers actively visiting multiple flats.</p>
+                        
+                        <div class="text-3xl font-black text-emerald-400 font-mono mb-6">₹999 <span class="text-xs text-slate-400 font-sans font-normal">/ 60 Days</span></div>
+
+                        <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 15 Direct Verified Owner Numbers</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Free Home Loan Pre-Approval Desk (@ 8.35%)</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> WhatsApp Location Pins & Floorplans</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Cost per contact: ~₹66 only</li>
+                        </ul>
+                    </div>
+                    <button onclick="openPassModal('Pro Buyer Pass', 999, 15)" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 transition-all">
+                        Buy 15 Contacts (₹999)
+                    </button>
+                </div>
+
+                <!-- Investor Pack -->
+                <div class="bg-prop-card rounded-3xl p-6 border border-white/10 flex flex-col justify-between hover:border-amber-500/40 transition-all">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">VIP Investor Pass</span>
+                        <h3 class="text-xl font-extrabold text-white mt-3 mb-1">35 Owner Contacts</h3>
+                        <p class="text-xs text-slate-400 mb-4">For property investors and commercial buyers.</p>
+                        
+                        <div class="text-3xl font-black text-white font-mono mb-6">₹1,999 <span class="text-xs text-slate-400 font-sans font-normal">/ 90 Days</span></div>
+
+                        <ul class="space-y-2 text-xs text-slate-300 mb-6">
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 35 Direct Verified Owner Contacts</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Dedicated DSA Loan Relationship Manager</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Property Document Verification Guidance</li>
+                            <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Cost per contact: ~₹57 only</li>
+                        </ul>
+                    </div>
+                    <button onclick="openPassModal('VIP Investor Pass', 1999, 35)" class="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg shadow-amber-600/20 transition-all">
+                        Buy 35 Contacts (₹1,999)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-prop-navy border-t border-white/10 py-10 px-4 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+                <span class="text-white font-black text-sm block mb-1">LEADS INDIA REAL ESTATE & PROPERTY NETWORK</span>
+                <p>Zero Brokerage Direct Owner Marketplace • Vasai East, Mumbai, Maharashtra 401208</p>
+                <p class="text-[11px] text-slate-500 mt-1">Covering Mumbai MMR, Delhi NCR, Bengaluru, Hyderabad, Pune, Chennai, Kolkata, Ahmedabad & 50+ Cities.</p>
+            </div>
+            <div class="flex items-center gap-6 font-medium">
+                <a href="index.html" class="hover:text-white transition-colors">Home</a>
+                <a href="loans.html" class="hover:text-white transition-colors">Loans</a>
+                <a href="properties.html" class="text-emerald-400 font-bold">Properties</a>
+                <a href="software.html" class="hover:text-white transition-colors">Software Hub</a>
+                <a href="https://wa.me/919145597951" class="text-emerald-400 font-bold">WhatsApp Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- UPI Modal for Contact Pass Recharge -->
+    <div id="contactPassModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-prop-card border border-white/15 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative my-8">
+            <button onclick="closePassModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 flex items-center justify-center">✕</button>
+
+            <div class="text-center mb-6">
+                <span class="text-[10px] uppercase font-black tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">⚡ Instant UPI Activation</span>
+                <h3 id="modalPassTitle" class="text-lg font-black text-white mt-3 mb-1">Pass Title</h3>
+                <div class="text-3xl font-black text-emerald-400">₹<span id="modalPassPrice">0</span></div>
+                <p class="text-xs text-slate-400 mt-1">Get <strong id="modalPassCredits" class="text-white">0</strong> Verified Owner Contacts instantly</p>
+            </div>
+
+            <!-- Dynamic QR Code -->
+            <div class="bg-white p-4 rounded-2xl flex flex-col items-center justify-center w-56 h-56 mx-auto mb-4 shadow-xl border-4 border-emerald-500/30">
+                <img id="modalPassQr" src="" alt="UPI QR Code" class="w-full h-full object-contain">
+            </div>
+
+            <p class="text-center text-xs text-slate-400 mb-4">Scan with GPay, PhonePe, Paytm or any UPI app</p>
+
+            <div class="bg-prop-dark p-3 rounded-xl border border-white/10 flex items-center justify-between mb-4">
+                <div class="text-xs">
+                    <span class="text-slate-400 block text-[10px]">Merchant UPI VPA:</span>
+                    <span class="font-mono font-bold text-white text-xs">subhashkamalsingh-6@okicici</span>
+                </div>
+                <button onclick="copyMerchantUpi()" id="copyPassUpiBtn" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">Copy</button>
+            </div>
+
+            <div class="bg-prop-dark p-4 rounded-2xl border border-white/10 mb-4">
+                <label for="passUtrInput" class="block text-xs font-bold text-slate-300 mb-1">Enter 12-Digit UPI Ref / UTR No.</label>
+                <div class="flex gap-2">
+                    <input type="text" id="passUtrInput" placeholder="e.g. 423589123456" class="flex-1 bg-prop-navy border border-white/15 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-slate-500 focus:outline-none">
+                    <button onclick="verifyPassCredits()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs whitespace-nowrap">Add Credits</button>
+                </div>
+            </div>
+
+            <a id="passWaNotifyBtn" href="#" target="_blank" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-semibold text-xs flex items-center justify-center gap-2">
+                <span>💬 WhatsApp Support (+91 9145597951)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Contact Reveal Modal -->
+    <div id="contactRevealModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-prop-card border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center relative">
+            <button onclick="closeRevealModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+            <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-xl mb-3">📞</div>
+            <h3 class="text-base font-black text-white mb-1">Owner Contact Unlocked!</h3>
+            <p id="revealedPropTitle" class="text-xs text-slate-400 mb-4">Property</p>
+
+            <div class="bg-prop-dark p-4 rounded-2xl border border-white/10 mb-4">
+                <div class="text-xs text-slate-400 mb-1">Direct Owner: <strong id="revealedOwnerName" class="text-white">Owner</strong></div>
+                <div class="text-2xl font-black text-emerald-400 font-mono tracking-wider mb-2" id="revealedPhone">+91 9145597951</div>
+                <a id="revealedCallBtn" href="tel:+919145597951" class="block w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs mb-2">📞 Call Owner Directly</a>
+                <a id="revealedWaBtn" href="#" target="_blank" class="block w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-xs">💬 Chat on WhatsApp</a>
+            </div>
+
+            <div class="text-[11px] text-slate-400">1 Contact Credit Deducted. Remaining: <strong id="remainingCreditsDisplay" class="text-white">0</strong></div>
+        </div>
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script>
+        const MERCHANT_UPI = 'subhashkamalsingh-6@okicici';
+        const MERCHANT_NAME = 'Subhash Singh';
+        const SUPPORT_PHONE = '919145597951';
+
+        // Local Credits Storage
+        let userCredits = parseInt(localStorage.getItem('li_contact_credits') || '1'); // 1 Free credit for first time user!
+        updateCreditsDisplay();
+
+        function updateCreditsDisplay() {
+            document.getElementById('navCreditsCount').innerText = userCredits;
+        }
+
+        const properties = [
+            {
+                id: 1,
+                title: "Luxurious 2 BHK Garden Facing Flat",
+                city: "Mumbai MMR",
+                location: "Vasai East, Mumbai MMR",
+                price: "₹ 48,50,000",
+                bhk: "2 BHK • 680 Sq.ft",
+                owner: "Suresh Patil (Direct Owner)",
+                phone: "9145597951",
+                loanEmi: "₹ 35,400/mo @ 8.35%",
+                img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: 2,
+                title: "Modern 1 BHK Near Metro Station",
+                city: "Mumbai MMR",
+                location: "Mira Road, Mumbai MMR",
+                price: "₹ 38,00,000",
+                bhk: "1 BHK • 450 Sq.ft",
+                owner: "Kavita Desai (Owner)",
+                phone: "9145597951",
+                loanEmi: "₹ 27,700/mo @ 8.35%",
+                img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: 3,
+                title: "Premium 3 BHK High-Rise with Balcony",
+                city: "Delhi NCR",
+                location: "Golf Course Extension, Gurugram (Delhi NCR)",
+                price: "₹ 1,45,00,000",
+                bhk: "3 BHK • 1,650 Sq.ft",
+                owner: "Amitav Roy (Owner)",
+                phone: "9145597951",
+                loanEmi: "₹ 1,05,800/mo @ 8.40%",
+                img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: 4,
+                title: "Spacious 2 BHK Tech Corridor Apartment",
+                city: "Bengaluru",
+                location: "Whitefield, Bengaluru",
+                price: "₹ 82,00,000",
+                bhk: "2 BHK • 1,120 Sq.ft",
+                owner: "Naveen Reddy (Owner)",
+                phone: "9145597951",
+                loanEmi: "₹ 59,800/mo @ 8.35%",
+                img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: 5,
+                title: "Gated Community 2 BHK Near IT Park",
+                city: "Pune",
+                location: "Wakad, Pune",
+                price: "₹ 62,00,000",
+                bhk: "2 BHK • 950 Sq.ft",
+                owner: "Rohit Kulkarni (Owner)",
+                phone: "9145597951",
+                loanEmi: "₹ 45,200/mo @ 8.40%",
+                img: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: 6,
+                title: "Premium 3 BHK Gachibowli Vista",
+                city: "Hyderabad",
+                location: "Financial District, Hyderabad",
+                price: "₹ 1,15,00,000",
+                bhk: "3 BHK • 1,780 Sq.ft",
+                owner: "Venkatesh Rao (Owner)",
+                phone: "9145597951",
+                loanEmi: "₹ 83,900/mo @ 8.45%",
+                img: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=600&auto=format&fit=crop&q=80"
+            }
+        ];
+
+        let currentFilterCity = 'All India';
+
+        function filterCity(city) {
+            currentFilterCity = city;
+            document.getElementById('activeCityTitle').innerText = city;
+
+            document.querySelectorAll('.city-btn').forEach(btn => {
+                if (btn.getAttribute('data-city') === city) {
+                    btn.classList.remove('bg-prop-card', 'text-slate-300', 'border-white/10');
+                    btn.classList.add('bg-emerald-600', 'text-white', 'shadow-md', 'shadow-emerald-600/30');
+                } else {
+                    btn.classList.add('bg-prop-card', 'text-slate-300', 'border-white/10');
+                    btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md', 'shadow-emerald-600/30');
+                }
+            });
+
+            renderPropertyCards();
+        }
+
+        function filterProperties() {
+            renderPropertyCards();
+        }
+
+        function renderPropertyCards() {
+            const query = document.getElementById('propertySearchInput').value.toLowerCase().trim();
+            const grid = document.getElementById('propertyGrid');
+            
+            const filtered = properties.filter(p => {
+                const matchCity = (currentFilterCity === 'All India' || p.city === currentFilterCity);
+                const matchQuery = !query || p.title.toLowerCase().includes(query) || p.location.toLowerCase().includes(query) || p.bhk.toLowerCase().includes(query);
+                return matchCity && matchQuery;
+            });
+
+            document.getElementById('propertyCountBadge').innerText = filtered.length;
+
+            let html = '';
+            filtered.forEach(p => {
+                html += `
+                    <div class="bg-prop-card rounded-3xl overflow-hidden border border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between shadow-xl">
+                        <div>
+                            <div class="relative h-48 overflow-hidden">
+                                <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                                <span class="absolute top-3 left-3 bg-emerald-600 text-white font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full shadow">Direct Owner • 0% Brokerage</span>
+                                <span class="absolute bottom-3 right-3 bg-prop-navy/90 text-white font-bold text-xs px-3 py-1 rounded-lg backdrop-blur">${p.bhk}</span>
+                            </div>
+
+                            <div class="p-5">
+                                <div class="text-xs text-slate-400 mb-1">📍 ${p.location}</div>
+                                <h3 class="font-extrabold text-white text-base mb-2">${p.title}</h3>
+                                
+                                <div class="flex items-baseline justify-between mb-4">
+                                    <div class="text-2xl font-black text-white font-mono">${p.price}</div>
+                                    <div class="text-[11px] text-emerald-400 font-semibold">${p.loanEmi}</div>
+                                </div>
+
+                                <div class="bg-prop-navy p-3 rounded-xl border border-white/5 text-xs text-slate-300 mb-4">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Verified Seller:</span>
+                                    <span class="font-bold text-white">${p.owner}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 pt-0 grid grid-cols-2 gap-2">
+                            <button onclick="handleUnlockClick(${p.id})" class="py-2.5 rounded-xl bg-prop-dark hover:bg-white/10 text-white font-bold text-xs text-center border border-white/10 transition-colors flex items-center justify-center gap-1.5">
+                                <span>📞 Unlock Owner</span>
+                            </button>
+                            <a href="loans.html" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center shadow-lg shadow-emerald-600/25 transition-colors flex items-center justify-center gap-1">
+                                <span>🏡 8.35% Loan</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function handleUnlockClick(propId) {
+            if (userCredits <= 0) {
+                // Out of credits, prompt for recharge pack
+                alert('Aapke pass contact credits khatam ho gaye hain. Kripya niche diye gaye Recharge Pack (₹499 for 5 Contacts) se recharge karein!');
+                document.getElementById('pricing-packs').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const prop = properties.find(p => p.id === propId);
+            if (!prop) return;
+
+            // Deduct 1 credit
+            userCredits -= 1;
+            localStorage.setItem('li_contact_credits', userCredits.toString());
+            updateCreditsDisplay();
+
+            // Show Reveal Modal
+            document.getElementById('revealedPropTitle').innerText = `${prop.title} (${prop.location})`;
+            document.getElementById('revealedOwnerName').innerText = prop.owner;
+            document.getElementById('revealedPhone').innerText = `+91 ${prop.phone}`;
+            document.getElementById('revealedCallBtn').href = `tel:+91${prop.phone}`;
+            
+            const waText = encodeURIComponent(`Hi ${prop.owner}, I found your flat "${prop.title}" on Leads India Properties. Is it still available?`);
+            document.getElementById('revealedWaBtn').href = `https://wa.me/91${prop.phone}?text=${waText}`;
+            document.getElementById('remainingCreditsDisplay').innerText = userCredits;
+
+            document.getElementById('contactRevealModal').classList.remove('hidden');
+            document.getElementById('contactRevealModal').classList.add('flex');
+        }
+
+        function closeRevealModal() {
+            document.getElementById('contactRevealModal').classList.add('hidden');
+            document.getElementById('contactRevealModal').classList.remove('flex');
+        }
+
+        // Pass Recharge Modal
+        let activePassTitle = '';
+        let activePassPrice = 0;
+        let activePassCredits = 0;
+
+        function openPassModal(title, price, credits) {
+            activePassTitle = title;
+            activePassPrice = price;
+            activePassCredits = credits;
+
+            document.getElementById('modalPassTitle').innerText = title;
+            document.getElementById('modalPassPrice').innerText = price.toLocaleString('en-IN');
+            document.getElementById('modalPassCredits').innerText = credits;
+
+            const upiUri = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${price}&cu=INR&tn=${encodeURIComponent('LeadsIndia ' + title)}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+            document.getElementById('modalPassQr').src = qrUrl;
+
+            const waText = encodeURIComponent(`Hi Subhash, I want to purchase "${title}" (₹${price}) for ${credits} Owner Contacts on Leads India.`);
+            document.getElementById('passWaNotifyBtn').href = `https://wa.me/${SUPPORT_PHONE}?text=${waText}`;
+
+            document.getElementById('contactPassModal').classList.remove('hidden');
+            document.getElementById('contactPassModal').classList.add('flex');
+        }
+
+        function closePassModal() {
+            document.getElementById('contactPassModal').classList.add('hidden');
+            document.getElementById('contactPassModal').classList.remove('flex');
+        }
+
+        function copyMerchantUpi() {
+            navigator.clipboard.writeText(MERCHANT_UPI).then(() => {
+                const btn = document.getElementById('copyPassUpiBtn');
+                btn.innerText = 'Copied!';
+                setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+            });
+        }
+
+        function verifyPassCredits() {
+            const utr = document.getElementById('passUtrInput').value.trim();
+            if (utr.length < 4) {
+                alert('Kripya valid 12-digit UPI UTR number daalein.');
+                return;
+            }
+
+            userCredits += activePassCredits;
+            localStorage.setItem('li_contact_credits', userCredits.toString());
+            updateCreditsDisplay();
+
+            alert(`🎉 Payment Verified! ${activePassCredits} Owner Contact credits aapke account me add ho chuke hain.`);
+            closePassModal();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPropertyCards();
+        });
+    </script>
+</body>
+</html>
