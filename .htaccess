@@ -32,6 +32,7 @@ RewriteRule ^$ index.php [L]
 # Clean public routes.
 RewriteRule ^list-property/?$ owner/list-property.php [L]
 RewriteRule ^properties/?$ properties-page.php [L]
+RewriteRule ^property/(LI-[A-Z0-9-]+)/?$ property.php?ref=$1 [L,QSA,NC]
 RewriteRule ^loans/?$ loans.php [L]
 RewriteRule ^software/?$ software.php [L]
 
