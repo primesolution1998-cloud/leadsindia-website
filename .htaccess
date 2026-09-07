@@ -2,6 +2,9 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Campaign landing homepage wrapper; preserves original index.html and injects the property-owner offer.
+RewriteRule ^$ index.php [L]
+
 # Clean public route for property-owner onboarding; login required before listing.
 RewriteRule ^list-property/?$ owner/list-property.php [L]
 
