@@ -3,6 +3,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
 require_once dirname(__DIR__) . '/owner/_auth.php';
+require_once dirname(__DIR__) . '/lib/property-store.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -38,13 +39,11 @@ if (!in_array($purpose, ['Sale','Rent'], true)) fail(422, 'Invalid purpose.');
 
 $reference = 'LI-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 $createdAt = gmdate('c');
+$dataDir = li_property_data_dir();
+$uploadDir = li_property_photo_dir($reference);
 
-$root = dirname(__DIR__);
-$dataDir = $root . '/storage/property-submissions';
-$uploadDir = $root . '/uploads/properties/' . $reference;
-
-if (!is_dir($dataDir) && !mkdir($dataDir, 0750, true) && !is_dir($dataDir)) fail(500, 'Storage unavailable.');
-if (!is_dir($uploadDir) && !mkdir($uploadDir, 0750, true) && !is_dir($uploadDir)) fail(500, 'Upload storage unavailable.');
+if (!is_dir($dataDir) || !is_writable($dataDir)) fail(500, 'Storage unavailable.');
+if (!is_dir($uploadDir) || !is_writable($uploadDir)) fail(500, 'Upload storage unavailable.');
 
 $photos = [];
 if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
@@ -64,7 +63,8 @@ if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
         $filename = sprintf('%02d-%s.%s', $i + 1, bin2hex(random_bytes(4)), $allowed[$mime]);
         $target = $uploadDir . '/' . $filename;
         if (!move_uploaded_file($tmp, $target)) fail(500, 'Could not save uploaded photo.');
-        $photos[] = '/uploads/properties/' . rawurlencode($reference) . '/' . rawurlencode($filename);
+        @chmod($target, 0640);
+        $photos[] = li_property_photo_url($reference, $filename);
     }
 }
 
@@ -100,10 +100,7 @@ $record = [
     ],
 ];
 
-$file = $dataDir . '/' . $reference . '.json';
-$json = json_encode($record, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-if (file_put_contents($file, $json, LOCK_EX) === false) fail(500, 'Could not save submission.');
-@chmod($file, 0640);
+if (!li_save_property($record)) fail(500, 'Could not save submission.');
 
 http_response_code(201);
 echo json_encode(['ok' => true, 'reference_id' => $reference, 'status' => 'PENDING_VERIFICATION']);
