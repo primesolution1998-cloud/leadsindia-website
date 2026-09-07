@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Search Property | Leads India</title>
+<meta name="description" content="Search verified properties for sale or rent on Leads India by city, locality and configuration.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{navy:'#07111f',blue:'#2563eb',emerald:'#10b981'}}}}</script>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+<div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+<a href="/" class="font-black text-xl text-slate-900">LEADS <span class="text-blue-600">INDIA</span></a>
+<div class="flex items-center gap-3"><a href="/properties.html" class="text-sm font-semibold text-slate-600 hover:text-blue-600">Browse Properties</a><a href="/owner/register.php" class="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-black text-white">Post Property FREE</a></div>
+</div></header>
+<section class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_#3b82f6,_transparent_35%)]"></div>
+<div class="relative max-w-7xl mx-auto px-4 py-16 lg:py-24">
+<div class="max-w-3xl"><span class="inline-flex rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-bold">VERIFIED PROPERTY SEARCH</span><h1 class="mt-5 text-4xl md:text-6xl font-black leading-tight">Search Your Property Here</h1><p class="mt-4 text-slate-300 text-lg">Buy, rent, commercial ya plot—city, locality aur configuration ke hisaab se verified listings search kijiye.</p></div>
+<div class="mt-10 max-w-5xl rounded-3xl bg-white text-slate-900 shadow-2xl p-4 md:p-6">
+<div class="flex flex-wrap gap-2 border-b border-slate-200 pb-4" id="tabs">
+<button data-purpose="Sale" class="tab px-4 py-2 rounded-xl bg-blue-600 text-white font-bold">Buy</button>
+<button data-purpose="Rent" class="tab px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100">Rent</button>
+<button data-purpose="Commercial" class="tab px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100">Commercial</button>
+<button data-purpose="Plot" class="tab px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100">Plots / Land</button>
+</div>
+<div class="grid md:grid-cols-[1fr_1fr_1fr_auto] gap-3 mt-4">
+<input id="city" placeholder="City e.g. Mumbai" class="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500">
+<input id="locality" placeholder="Locality / Project" class="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500">
+<select id="config" class="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"><option value="">Any Configuration</option><option>1 BHK</option><option>2 BHK</option><option>3 BHK</option><option>4 BHK</option></select>
+<button id="searchBtn" class="rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black px-6 py-3">Search</button>
+</div></div>
+</div></section>
+<main class="max-w-7xl mx-auto px-4 py-10">
+<div class="flex items-center justify-between gap-4 mb-6"><div><h2 class="text-2xl font-black">Verified Properties</h2><p id="resultText" class="text-sm text-slate-500 mt-1">Loading live listings…</p></div><a href="/owner/register.php" class="hidden sm:inline-flex rounded-xl border border-emerald-500 text-emerald-700 px-4 py-2 text-sm font-bold">Owner? List FREE</a></div>
+<div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+<div id="empty" class="hidden rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center"><div class="text-4xl">🏠</div><h3 class="mt-3 text-xl font-black">No matching verified property found</h3><p class="mt-2 text-sm text-slate-500">Search filters change kijiye ya current marketplace browse kijiye.</p><a href="/properties.html" class="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white">Browse All Properties</a></div>
+</main>
+<script>
+let all=[],purpose='Sale';
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function money(v){const n=Number(String(v||'').replace(/\D/g,''));return n?('₹ '+n.toLocaleString('en-IN')):esc(v||'Price on request');}
+function apply(){const city=document.getElementById('city').value.trim().toLowerCase(),loc=document.getElementById('locality').value.trim().toLowerCase(),cfg=document.getElementById('config').value.toLowerCase();const filtered=all.filter(p=>{const type=(p.type||'').toLowerCase();const purposeMatch=purpose==='Commercial'?type.includes('commercial'):(purpose==='Plot'?type.includes('plot')||type.includes('land'):(p.purpose||'')===purpose);return purposeMatch&&(!city||(p.city||'').toLowerCase().includes(city))&&(!loc||((p.locality||'')+' '+(p.project_name||'')).toLowerCase().includes(loc))&&(!cfg||(p.configuration||'').toLowerCase().includes(cfg));});render(filtered);}
+function render(items){const grid=document.getElementById('grid'),empty=document.getElementById('empty');document.getElementById('resultText').textContent=items.length+' verified listing'+(items.length===1?'':'s')+' found';if(!items.length){grid.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');grid.innerHTML=items.map(p=>{const img=(p.photos&&p.photos[0])||'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900&auto=format&fit=crop&q=75';return `<article class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl transition"><div class="h-52 bg-slate-100 relative"><img src="${esc(img)}" alt="Property" class="w-full h-full object-cover"><span class="absolute top-3 left-3 rounded-full bg-emerald-500 text-white text-[11px] font-black px-3 py-1">✓ VERIFIED</span></div><div class="p-5"><div class="text-xs font-bold text-blue-600">${esc(p.purpose||'Property')} • ${esc(p.type||'')}</div><h3 class="mt-2 text-lg font-black">${esc(p.project_name||p.configuration||p.type||'Verified Property')}</h3><p class="mt-1 text-sm text-slate-500">📍 ${esc(p.locality||'')}${p.city?', '+esc(p.city):''}</p><div class="mt-4 flex items-end justify-between gap-3"><div><div class="text-2xl font-black">${money(p.price)}</div><div class="text-xs text-slate-500 mt-1">${esc(p.configuration||'')} ${p.area?'• '+esc(p.area):''}</div></div><a href="/properties.html" class="rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white">View</a></div></div></article>`}).join('');}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{purpose=b.dataset.purpose;document.querySelectorAll('.tab').forEach(x=>x.className='tab px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100');b.className='tab px-4 py-2 rounded-xl bg-blue-600 text-white font-bold';apply();}));document.getElementById('searchBtn').addEventListener('click',apply);['city','locality','config'].forEach(id=>document.getElementById(id).addEventListener('input',apply));
+fetch('/api/properties-public.php',{headers:{Accept:'application/json'}}).then(r=>r.json()).then(d=>{all=Array.isArray(d.properties)?d.properties:[];apply();}).catch(()=>{all=[];render([]);document.getElementById('resultText').textContent='Could not load live listings right now.';});
+</script>
+</body></html>
