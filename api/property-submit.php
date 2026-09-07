@@ -2,6 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
+require_once dirname(__DIR__) . '/owner/_auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -15,6 +16,11 @@ function fail($code, $message) {
     exit;
 }
 
+$ownerAccount = owner_current();
+if (!$ownerAccount || ($ownerAccount['status'] ?? '') !== 'ACTIVE') {
+    fail(401, 'Please login to your property owner account before submitting.');
+}
+
 function clean($key, $max = 255) {
     $value = isset($_POST[$key]) ? trim((string)$_POST[$key]) : '';
     $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value);
@@ -22,16 +28,10 @@ function clean($key, $max = 255) {
     return $value;
 }
 
-$required = ['owner_name','owner_mobile','purpose','property_type','area','price','city','locality','address','description','declaration'];
+$required = ['purpose','property_type','area','price','city','locality','address','description','declaration'];
 foreach ($required as $field) {
     if (empty($_POST[$field])) fail(422, 'Please complete all required fields.');
 }
-
-$mobile = preg_replace('/\D+/', '', clean('owner_mobile', 10));
-if (!preg_match('/^[6-9][0-9]{9}$/', $mobile)) fail(422, 'Enter a valid 10-digit Indian mobile number.');
-
-$email = clean('owner_email', 150);
-if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) fail(422, 'Enter a valid email address.');
 
 $purpose = clean('purpose', 20);
 if (!in_array($purpose, ['Sale','Rent'], true)) fail(422, 'Invalid purpose.');
@@ -74,9 +74,10 @@ $record = [
     'created_at' => $createdAt,
     'updated_at' => $createdAt,
     'owner' => [
-        'name' => clean('owner_name', 100),
-        'mobile' => $mobile,
-        'email' => $email,
+        'account_id' => $ownerAccount['id'],
+        'name' => $ownerAccount['name'],
+        'mobile' => $ownerAccount['mobile'],
+        'email' => $ownerAccount['email'] ?? '',
     ],
     'property' => [
         'purpose' => $purpose,
