@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Your Property | Leads India</title>
+  <meta name="description" content="List your property directly on Leads India. Submit owner and property details for verification and publish after approval.">
+  <link rel="canonical" href="https://leadsindia.in/list-property.html">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{navy:'#030712',card:'#0f172a',emerald:'#10b981'}}}}</script>
+</head>
+<body class="bg-navy text-slate-100 min-h-screen">
+<header class="sticky top-0 z-50 bg-navy/95 backdrop-blur border-b border-white/10">
+  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="index.html" class="font-black text-xl">LEADS <span class="text-emerald-400">INDIA</span></a>
+    <a href="properties.html" class="text-sm font-semibold text-slate-300 hover:text-white">← View Properties</a>
+  </div>
+</header>
+<main class="max-w-5xl mx-auto px-4 py-10">
+  <section class="text-center max-w-3xl mx-auto mb-8">
+    <span class="inline-flex px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-bold">DIRECT OWNER ONBOARDING</span>
+    <h1 class="text-3xl md:text-5xl font-black mt-4">List Your Property on Leads India</h1>
+    <p class="text-slate-400 mt-3">Submit your property → Leads India verifies ownership/details → approved listing goes live with a Verified badge.</p>
+  </section>
+
+  <div class="grid md:grid-cols-3 gap-4 mb-8">
+    <div class="rounded-2xl bg-card border border-white/10 p-4"><div class="text-emerald-400 font-black">01</div><div class="font-bold mt-1">Submit Property</div><p class="text-xs text-slate-400 mt-1">Owner details, location, price and property information.</p></div>
+    <div class="rounded-2xl bg-card border border-white/10 p-4"><div class="text-amber-400 font-black">02</div><div class="font-bold mt-1">Verification</div><p class="text-xs text-slate-400 mt-1">Our team checks owner contact and listing authenticity.</p></div>
+    <div class="rounded-2xl bg-card border border-white/10 p-4"><div class="text-blue-400 font-black">03</div><div class="font-bold mt-1">Go Live</div><p class="text-xs text-slate-400 mt-1">Only approved properties appear publicly on LeadsIndia.</p></div>
+  </div>
+
+  <form id="propertyForm" class="bg-card border border-white/10 rounded-3xl p-5 md:p-8 space-y-7" enctype="multipart/form-data">
+    <div>
+      <h2 class="text-lg font-black">Owner Details</h2>
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm">Full Name<input required name="owner_name" maxlength="100" autocomplete="name" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3 outline-none focus:border-emerald-500" placeholder="Property owner name"></label>
+        <label class="text-sm">Mobile / WhatsApp<input required name="owner_mobile" inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3 outline-none focus:border-emerald-500" placeholder="10-digit mobile number"></label>
+        <label class="text-sm md:col-span-2">Email (optional)<input name="owner_email" type="email" maxlength="150" autocomplete="email" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3 outline-none focus:border-emerald-500" placeholder="you@example.com"></label>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 pt-6">
+      <h2 class="text-lg font-black">Property Details</h2>
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm">Purpose<select required name="purpose" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3"><option value="">Select</option><option>Sale</option><option>Rent</option></select></label>
+        <label class="text-sm">Property Type<select required name="property_type" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3"><option value="">Select</option><option>Apartment / Flat</option><option>Independent House</option><option>Plot / Land</option><option>Commercial Office</option><option>Shop / Showroom</option><option>Warehouse</option><option>Other</option></select></label>
+        <label class="text-sm">BHK / Configuration<input name="configuration" maxlength="50" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="e.g. 2 BHK"></label>
+        <label class="text-sm">Carpet / Built-up Area<input required name="area" maxlength="50" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="e.g. 750 sq.ft"></label>
+        <label class="text-sm">Expected Price / Rent (₹)<input required name="price" inputmode="numeric" maxlength="14" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="e.g. 6500000"></label>
+        <label class="text-sm">Project / Society<input name="project_name" maxlength="120" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="Society or project name"></label>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 pt-6">
+      <h2 class="text-lg font-black">Location</h2>
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm">City<input required name="city" maxlength="80" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="e.g. Mumbai"></label>
+        <label class="text-sm">Locality<input required name="locality" maxlength="120" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="e.g. Vasai East"></label>
+        <label class="text-sm md:col-span-2">Full Address<textarea required name="address" maxlength="500" rows="3" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="Building, road, landmark, PIN code"></textarea></label>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 pt-6">
+      <h2 class="text-lg font-black">Listing Details</h2>
+      <div class="space-y-4 mt-4">
+        <label class="text-sm block">Property Description<textarea required name="description" maxlength="1500" rows="5" class="mt-2 w-full rounded-xl bg-slate-950 border border-white/10 px-4 py-3" placeholder="Condition, amenities, parking, possession, nearby landmarks..."></textarea></label>
+        <label class="text-sm block">Property Photos <span class="text-slate-500">(up to 10, JPG/PNG/WebP, max 5 MB each)</span><input name="photos[]" type="file" accept="image/jpeg,image/png,image/webp" multiple class="mt-2 block w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:font-bold file:text-white"></label>
+      </div>
+    </div>
+
+    <label class="flex gap-3 items-start text-xs text-slate-300 border-t border-white/10 pt-6"><input required type="checkbox" name="declaration" value="1" class="mt-1"><span>I declare that I am the property owner or legally authorised to list this property, and the information submitted is accurate. I understand the listing will remain pending until Leads India verification.</span></label>
+
+    <div id="formMessage" class="hidden rounded-xl px-4 py-3 text-sm"></div>
+    <button id="submitBtn" type="submit" class="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-4 font-black text-white disabled:opacity-50">Submit Property for Verification</button>
+    <p class="text-center text-[11px] text-slate-500">Submission does not publish your property automatically. Leads India approval is mandatory.</p>
+  </form>
+</main>
+<script>
+const form=document.getElementById('propertyForm');
+const msg=document.getElementById('formMessage');
+const btn=document.getElementById('submitBtn');
+form.addEventListener('submit',async(e)=>{
+  e.preventDefault(); msg.className='hidden'; btn.disabled=true; btn.textContent='Submitting…';
+  try{
+    const res=await fetch('/api/property-submit.php',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.ok) throw new Error(data.message||'Submission failed. Please try again.');
+    msg.className='rounded-xl px-4 py-3 text-sm border border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+    msg.innerHTML='<strong>Submitted successfully.</strong><br>Reference ID: <span class="font-mono">'+String(data.reference_id||'')+'</span><br>Your property is now pending Leads India verification.';
+    form.reset(); window.scrollTo({top:msg.offsetTop-140,behavior:'smooth'});
+  }catch(err){
+    msg.className='rounded-xl px-4 py-3 text-sm border border-red-500/30 bg-red-500/10 text-red-300'; msg.textContent=err.message;
+  }finally{btn.disabled=false;btn.textContent='Submit Property for Verification';}
+});
+</script>
+</body>
+</html>
