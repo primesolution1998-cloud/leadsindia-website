@@ -15,7 +15,7 @@ RewriteRule ^$ index.php [L]
 # Clean public routes.
 RewriteRule ^list-property/?$ owner/list-property.php [L]
 RewriteRule ^search-property/?$ search-property.html [L]
-RewriteRule ^properties/?$ properties.html [L]
+RewriteRule ^properties/?$ properties.php [L]
 
 # Ensure static HTML pages are rendered by browsers, not served as plain text/downloads.
 AddType text/html .html .htm
