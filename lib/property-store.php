@@ -37,7 +37,7 @@ function li_property_photo_url(string $reference, string $filename): string {
 }
 
 function li_allowed_statuses(): array {
-    return ['PENDING_VERIFICATION','UNDER_REVIEW','NEED_CORRECTION','VERIFIED','REJECTED','LIVE','PAUSED','SOLD','RENTED'];
+    return ['PENDING_VERIFICATION','UNDER_REVIEW','NEED_CORRECTION','VERIFIED','REJECTED','LIVE','PAUSED','SOLD','RENTED','OWNER_DELETED'];
 }
 
 function li_load_property(string $reference): ?array {
@@ -94,7 +94,6 @@ function li_auto_publish_unreviewed(int $hours = 24): int {
         if (!is_array($record)) continue;
         if (($record['status'] ?? '') !== 'PENDING_VERIFICATION') continue;
 
-        // If anyone on the backend has touched the status, do not auto-publish.
         $history = $record['status_history'] ?? [];
         if (is_array($history) && count($history) > 0) continue;
 
@@ -120,7 +119,6 @@ function li_auto_publish_unreviewed(int $hours = 24): int {
 }
 
 function li_all_properties(): array {
-    // Opportunistic safety net: normal site/admin traffic also processes overdue items.
     li_auto_publish_unreviewed(24);
 
     $dir = li_property_data_dir();
