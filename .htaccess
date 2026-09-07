@@ -2,6 +2,9 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Clean public route for property-owner onboarding.
+RewriteRule ^list-property/?$ list-property.html [L]
+
 # Ensure static HTML pages are rendered by browsers, not served as plain text/downloads.
 AddType text/html .html .htm
 
