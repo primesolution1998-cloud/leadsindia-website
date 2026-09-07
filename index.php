@@ -41,7 +41,8 @@ if (strpos($html, $legacyHeroStart) !== false) {
     );
 }
 
-// Normalize old public .html references that can still exist in legacy SEO/nav markup.
+// Normalize old public .html references and make the brand logo return to the
+// clean root URL instead of creating a trailing # in the browser address bar.
 $html = strtr($html, [
     'https://leadsindia.in/properties.html' => 'https://leadsindia.in/properties',
     'https://leadsindia.in/loans.html' => 'https://leadsindia.in/loans',
@@ -49,7 +50,16 @@ $html = strtr($html, [
     'href="properties.html"' => 'href="/properties"',
     'href="loans.html"' => 'href="/loans"',
     'href="software.html"' => 'href="/software"',
+    'href="#" class="flex items-center gap-3 group"' => 'href="/" class="flex items-center gap-3 group"',
 ]);
+
+// Remove a lone trailing # left by older cached homepage links without
+// interfering with real section anchors such as #contact or #software-hub.
+$html = str_replace(
+    '</body>',
+    '<script>if(location.pathname==="/" && location.hash==="#"){history.replaceState(null,"","/");}</script></body>',
+    $html
+);
 
 header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-cache, no-store, must-revalidate');
