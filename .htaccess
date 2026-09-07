@@ -31,7 +31,7 @@ RewriteRule ^$ index.php [L]
 
 # Clean public routes.
 RewriteRule ^list-property/?$ owner/list-property.php [L]
-RewriteRule ^properties/?$ properties.php [L]
+RewriteRule ^properties/?$ properties-page.php [L]
 RewriteRule ^loans/?$ loans.php [L]
 RewriteRule ^software/?$ software.php [L]
 
