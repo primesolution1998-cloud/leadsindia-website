@@ -9,10 +9,26 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+function owner_private_root(): string {
+    $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__)), '/\\');
+    $parent = dirname($docRoot);
+    $dir = $parent . '/leadsindia-private';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    if (!is_dir($dir) || !is_writable($dir)) {
+        $dir = dirname(__DIR__) . '/storage-private';
+        if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    }
+    return $dir;
+}
+
 function owner_accounts_dir(): string {
-    $dir = dirname(__DIR__) . '/storage/owner-accounts';
+    $dir = owner_private_root() . '/owner-accounts';
     if (!is_dir($dir)) @mkdir($dir, 0750, true);
     return $dir;
+}
+
+function owner_legacy_accounts_dir(): string {
+    return dirname(__DIR__) . '/storage/owner-accounts';
 }
 
 function normalize_mobile(string $mobile): string {
@@ -23,19 +39,48 @@ function owner_account_path(string $mobile): string {
     return owner_accounts_dir() . '/' . normalize_mobile($mobile) . '.json';
 }
 
+function owner_legacy_account_path(string $mobile): string {
+    return owner_legacy_accounts_dir() . '/' . normalize_mobile($mobile) . '.json';
+}
+
 function owner_load(string $mobile): ?array {
+    $mobile = normalize_mobile($mobile);
     $file = owner_account_path($mobile);
+
+    if (!is_file($file)) {
+        $legacy = owner_legacy_account_path($mobile);
+        if (is_file($legacy)) {
+            $legacyData = json_decode((string)file_get_contents($legacy), true);
+            if (is_array($legacyData)) {
+                owner_save($legacyData);
+                $file = owner_account_path($mobile);
+            }
+        }
+    }
+
     if (!is_file($file)) return null;
     $data = json_decode((string)file_get_contents($file), true);
     return is_array($data) ? $data : null;
 }
 
 function owner_save(array $account): bool {
+    if (empty($account['mobile'])) return false;
+    $dir = owner_accounts_dir();
+    if (!is_dir($dir) || !is_writable($dir)) return false;
+
     $file = owner_account_path((string)$account['mobile']);
+    $tmp = $file . '.tmp-' . bin2hex(random_bytes(4));
     $json = json_encode($account, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    $ok = file_put_contents($file, $json, LOCK_EX) !== false;
-    if ($ok) @chmod($file, 0640);
-    return $ok;
+    if ($json === false) return false;
+
+    if (file_put_contents($tmp, $json, LOCK_EX) === false) return false;
+    @chmod($tmp, 0640);
+    if (!@rename($tmp, $file)) {
+        @unlink($tmp);
+        return false;
+    }
+    @chmod($file, 0640);
+    return true;
 }
 
 function owner_login(array $account): void {
