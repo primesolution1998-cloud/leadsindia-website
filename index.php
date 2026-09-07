@@ -5,17 +5,52 @@ if (!is_file($home)) {
     echo 'Homepage unavailable.';
     exit;
 }
+
 $html = file_get_contents($home);
+if ($html === false) {
+    http_response_code(500);
+    echo 'Homepage unavailable.';
+    exit;
+}
+
 $blockFile = __DIR__ . '/property-owner-campaign-block.php';
 ob_start();
 if (is_file($blockFile)) {
     include $blockFile;
 }
 $block = ob_get_clean();
+
+// Keep the existing site header/footer and business sections, but use the
+// four-service campaign selector as the actual first hero on the homepage.
 $marker = '<!-- HERO SECTION -->';
+$legacyHeroStart = '<section class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden">';
+
 if ($block !== '' && strpos($html, $marker) !== false) {
     $html = str_replace($marker, $block . "\n\n    " . $marker, $html, $count);
 }
+
+// The old agency hero was appearing directly below the campaign selector and
+// making the homepage look like two different landing pages. Hide only that
+// exact legacy hero section; all downstream sections remain available.
+if (strpos($html, $legacyHeroStart) !== false) {
+    $html = str_replace(
+        $legacyHeroStart,
+        '<section class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden" style="display:none" aria-hidden="true">',
+        $html,
+        $heroCount
+    );
+}
+
+// Normalize old public .html references that can still exist in legacy SEO/nav markup.
+$html = strtr($html, [
+    'https://leadsindia.in/properties.html' => 'https://leadsindia.in/properties',
+    'https://leadsindia.in/loans.html' => 'https://leadsindia.in/loans',
+    'https://leadsindia.in/software.html' => 'https://leadsindia.in/software',
+    'href="properties.html"' => 'href="/properties"',
+    'href="loans.html"' => 'href="/loans"',
+    'href="software.html"' => 'href="/software"',
+]);
+
 header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
