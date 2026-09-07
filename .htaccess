@@ -9,6 +9,12 @@ RewriteRule ^index\.html$ / [R=301,L]
 RewriteCond %{THE_REQUEST} \s/+properties\.html(?:[?\s]) [NC]
 RewriteRule ^properties\.html$ /properties [R=301,L]
 
+RewriteCond %{THE_REQUEST} \s/+loans\.html(?:[?\s]) [NC]
+RewriteRule ^loans\.html$ /loans [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+software\.html(?:[?\s]) [NC]
+RewriteRule ^software\.html$ /software [R=301,L]
+
 # Campaign landing homepage wrapper.
 RewriteRule ^$ index.php [L]
 
@@ -16,6 +22,8 @@ RewriteRule ^$ index.php [L]
 RewriteRule ^list-property/?$ owner/list-property.php [L]
 RewriteRule ^search-property/?$ search-property.html [L]
 RewriteRule ^properties/?$ properties.php [L]
+RewriteRule ^loans/?$ loans.php [L]
+RewriteRule ^software/?$ software.php [L]
 
 # Ensure static HTML pages are rendered by browsers, not served as plain text/downloads.
 AddType text/html .html .htm
