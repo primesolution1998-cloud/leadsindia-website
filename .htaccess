@@ -2,12 +2,17 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Redirect legacy .html property URL to clean route without causing an internal rewrite loop.
+RewriteCond %{THE_REQUEST} \s/+properties\.html(?:[?\s]) [NC]
+RewriteRule ^properties\.html$ /properties [R=301,L]
+
 # Campaign landing homepage wrapper.
 RewriteRule ^$ index.php [L]
 
 # Clean public routes.
 RewriteRule ^list-property/?$ owner/list-property.php [L]
 RewriteRule ^search-property/?$ search-property.html [L]
+RewriteRule ^properties/?$ properties.html [L]
 
 # Ensure static HTML pages are rendered by browsers, not served as plain text/downloads.
 AddType text/html .html .htm
