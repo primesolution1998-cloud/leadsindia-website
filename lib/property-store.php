@@ -63,7 +63,66 @@ function li_save_property(array $record): bool {
     return $ok;
 }
 
+function li_audit(array &$record, string $from, string $to, string $by, string $note = ''): void {
+    if (!isset($record['status_history']) || !is_array($record['status_history'])) $record['status_history'] = [];
+    $record['status_history'][] = [
+        'from' => $from,
+        'to' => $to,
+        'by' => $by,
+        'note' => $note,
+        'at' => gmdate('c'),
+    ];
+}
+
+/**
+ * Publish properties that have remained untouched in PENDING_VERIFICATION
+ * for at least $hours. Any backend/admin status action creates status_history,
+ * which permanently excludes that property from automatic publishing.
+ */
+function li_auto_publish_unreviewed(int $hours = 24): int {
+    $hours = max(1, $hours);
+    $dir = li_property_data_dir();
+    if (!is_dir($dir)) return 0;
+
+    $cutoff = time() - ($hours * 3600);
+    $published = 0;
+
+    foreach (glob($dir . '/LI-*.json') ?: [] as $file) {
+        $json = file_get_contents($file);
+        if ($json === false) continue;
+        $record = json_decode($json, true);
+        if (!is_array($record)) continue;
+        if (($record['status'] ?? '') !== 'PENDING_VERIFICATION') continue;
+
+        // If anyone on the backend has touched the status, do not auto-publish.
+        $history = $record['status_history'] ?? [];
+        if (is_array($history) && count($history) > 0) continue;
+
+        $createdAt = strtotime((string)($record['created_at'] ?? ''));
+        if ($createdAt === false || $createdAt > $cutoff) continue;
+
+        $now = gmdate('c');
+        $record['status'] = 'LIVE';
+        $record['updated_at'] = $now;
+        $record['published_at'] = $record['published_at'] ?? $now;
+        $record['auto_published_at'] = $now;
+        $record['auto_publish_reason'] = 'No backend review within 24 hours';
+        $record['verification'] = $record['verification'] ?? [];
+        $record['verification']['verified'] = false;
+        $record['verification']['verified_at'] = $record['verification']['verified_at'] ?? null;
+        $record['verification']['verified_by'] = $record['verification']['verified_by'] ?? null;
+        li_audit($record, 'PENDING_VERIFICATION', 'LIVE', 'SYSTEM_AUTO_PUBLISH', 'Auto-published after 24 hours without backend review.');
+
+        if (li_save_property($record)) $published++;
+    }
+
+    return $published;
+}
+
 function li_all_properties(): array {
+    // Opportunistic safety net: normal site/admin traffic also processes overdue items.
+    li_auto_publish_unreviewed(24);
+
     $dir = li_property_data_dir();
     if (!is_dir($dir)) return [];
     $records = [];
@@ -75,15 +134,4 @@ function li_all_properties(): array {
     }
     usort($records, fn($a,$b) => strcmp((string)($b['created_at'] ?? ''), (string)($a['created_at'] ?? '')));
     return $records;
-}
-
-function li_audit(array &$record, string $from, string $to, string $by, string $note = ''): void {
-    if (!isset($record['status_history']) || !is_array($record['status_history'])) $record['status_history'] = [];
-    $record['status_history'][] = [
-        'from' => $from,
-        'to' => $to,
-        'by' => $by,
-        'note' => $note,
-        'at' => gmdate('c'),
-    ];
 }
