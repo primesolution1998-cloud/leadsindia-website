@@ -15,19 +15,23 @@ RewriteRule ^loans\.html$ /loans [R=301,L]
 RewriteCond %{THE_REQUEST} \s/+software\.html(?:[?\s]) [NC]
 RewriteRule ^software\.html$ /software [R=301,L]
 
+RewriteCond %{THE_REQUEST} \s/+list-property\.html(?:[?\s]) [NC]
+RewriteRule ^list-property\.html$ /list-property [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+search-property(?:\.html)?(?:[?\s]) [NC]
+RewriteRule ^search-property(?:\.html)?$ /properties [R=301,L]
+
 # Campaign landing homepage wrapper.
 RewriteRule ^$ index.php [L]
 
 # Clean public routes.
 RewriteRule ^list-property/?$ owner/list-property.php [L]
-RewriteRule ^search-property/?$ search-property.html [L]
 RewriteRule ^properties/?$ properties.php [L]
 RewriteRule ^loans/?$ loans.php [L]
 RewriteRule ^software/?$ software.php [L]
 
-# Ensure static HTML pages are rendered by browsers, not served as plain text/downloads.
+# Ensure static HTML pages render correctly.
 AddType text/html .html .htm
-
 <IfModule mod_mime.c>
   AddType text/html .html .htm
   AddType text/css .css
