@@ -50,16 +50,13 @@ if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
     $count = min(count($_FILES['photos']['name']), 10);
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
     $finfo = new finfo(FILEINFO_MIME_TYPE);
-
     for ($i = 0; $i < $count; $i++) {
         if ($_FILES['photos']['error'][$i] === UPLOAD_ERR_NO_FILE) continue;
         if ($_FILES['photos']['error'][$i] !== UPLOAD_ERR_OK) fail(422, 'One of the photos could not be uploaded.');
         if ($_FILES['photos']['size'][$i] > 5 * 1024 * 1024) fail(422, 'Each photo must be 5 MB or smaller.');
-
         $tmp = $_FILES['photos']['tmp_name'][$i];
         $mime = $finfo->file($tmp);
         if (!isset($allowed[$mime])) fail(422, 'Only JPG, PNG and WebP photos are allowed.');
-
         $filename = sprintf('%02d-%s.%s', $i + 1, bin2hex(random_bytes(4)), $allowed[$mime]);
         $target = $uploadDir . '/' . $filename;
         if (!move_uploaded_file($tmp, $target)) fail(500, 'Could not save uploaded photo.');
@@ -70,9 +67,10 @@ if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
 
 $record = [
     'reference_id' => $reference,
-    'status' => 'PENDING_VERIFICATION',
+    'status' => 'LIVE',
     'created_at' => $createdAt,
     'updated_at' => $createdAt,
+    'published_at' => $createdAt,
     'owner' => [
         'account_id' => $ownerAccount['id'],
         'name' => $ownerAccount['name'],
@@ -96,11 +94,18 @@ $record = [
         'verified' => false,
         'verified_at' => null,
         'verified_by' => null,
-        'notes' => null,
+        'notes' => 'Owner self-published; backend verification pending.',
     ],
 ];
-
+li_audit($record, 'NEW', 'LIVE', 'OWNER_SELF_PUBLISH', 'Published immediately after owner onboarding; contact remains hidden.');
 if (!li_save_property($record)) fail(500, 'Could not save submission.');
 
 http_response_code(201);
-echo json_encode(['ok' => true, 'reference_id' => $reference, 'status' => 'PENDING_VERIFICATION']);
+echo json_encode([
+    'ok' => true,
+    'reference_id' => $reference,
+    'status' => 'LIVE',
+    'marketplace_url' => '/properties',
+    'property_url' => '/property/' . rawurlencode($reference),
+    'dashboard_url' => '/owner/dashboard.php'
+], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
