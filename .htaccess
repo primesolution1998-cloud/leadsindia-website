@@ -2,6 +2,15 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Ensure static HTML pages are rendered by browsers, not served as plain text/downloads.
+AddType text/html .html .htm
+
+<IfModule mod_mime.c>
+  AddType text/html .html .htm
+  AddType text/css .css
+  AddType application/javascript .js
+</IfModule>
+
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
 </IfModule>
