@@ -3,7 +3,38 @@
 declare(strict_types=1);
 
 function li_root(): string { return dirname(__DIR__); }
-function li_property_data_dir(): string { return li_root() . '/storage/property-submissions'; }
+function li_private_root(): string {
+    $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? li_root()), '/\\');
+    $parent = dirname($docRoot);
+    $dir = $parent . '/leadsindia-private';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    if (!is_dir($dir) || !is_writable($dir)) {
+        $dir = li_root() . '/storage-private';
+        if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    }
+    return $dir;
+}
+function li_property_data_dir(): string {
+    $dir = li_private_root() . '/property-submissions';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    $legacy = li_root() . '/storage/property-submissions';
+    if (is_dir($legacy) && is_dir($dir)) {
+        foreach (glob($legacy . '/LI-*.json') ?: [] as $src) {
+            $dst = $dir . '/' . basename($src);
+            if (!is_file($dst)) @copy($src, $dst);
+        }
+    }
+    return $dir;
+}
+function li_property_photo_dir(string $reference): string {
+    $reference = preg_replace('/[^A-Z0-9-]/', '', strtoupper($reference));
+    $dir = li_private_root() . '/property-photos/' . $reference;
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    return $dir;
+}
+function li_property_photo_url(string $reference, string $filename): string {
+    return '/api/property-photo.php?ref=' . rawurlencode($reference) . '&file=' . rawurlencode($filename);
+}
 
 function li_allowed_statuses(): array {
     return ['PENDING_VERIFICATION','UNDER_REVIEW','NEED_CORRECTION','VERIFIED','REJECTED','LIVE','PAUSED','SOLD','RENTED'];
