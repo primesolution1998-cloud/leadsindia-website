@@ -8,6 +8,11 @@ if (!$record || ($record['status'] ?? '') !== 'LIVE') { http_response_code(404);
 $p = $record['property'] ?? [];
 $photos = is_array($p['photos'] ?? null) ? $p['photos'] : [];
 $title = trim((string)($p['configuration'] ?? 'Property').' for '.(($p['purpose'] ?? '') === 'Rent' ? 'Rent' : 'Sale').' in '.(string)($p['locality'] ?? '').', '.(string)($p['city'] ?? ''));
+$contactPrice = '299.00';
+$upiId = 'subhashkamalsingh-6@okicici';
+$upiName = 'Subhash Singh';
+$upiNote = 'Leads India Contact Unlock '.$ref;
+$upiUri = 'upi://pay?pa='.rawurlencode($upiId).'&pn='.rawurlencode($upiName).'&am='.$contactPrice.'&cu=INR&tn='.rawurlencode($upiNote);
 function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
@@ -19,6 +24,7 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 <meta name="description" content="<?=e(mb_substr((string)($p['description'] ?? $title),0,155))?>">
 <link rel="canonical" href="https://leadsindia.in/property/<?=rawurlencode($ref)?>">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>.gallery-img{cursor:zoom-in}.no-scroll{overflow:hidden}</style>
 </head>
 <body class="bg-slate-50 text-slate-900">
@@ -47,8 +53,8 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 <aside class="lg:sticky lg:top-6 self-start">
 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
 <div class="text-xs text-slate-500">Listing ID</div><div class="font-mono font-bold mt-1"><?=e($ref)?></div>
-<div class="mt-5 p-4 rounded-2xl bg-amber-50 border border-amber-200"><div class="font-black">Owner contact locked</div><p class="text-sm text-slate-600 mt-1">Property details and photos are free. Payment is required only to view the owner's mobile/contact details.</p></div>
-<button id="contactBtn" class="mt-4 w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3">🔒 View Owner Contact</button>
+<div class="mt-5 p-4 rounded-2xl bg-amber-50 border border-amber-200"><div class="font-black">Owner contact locked</div><p class="text-sm text-slate-600 mt-1">Property details and photos are free. Pay ₹299 only to unlock this property's direct owner contact.</p></div>
+<button id="contactBtn" class="mt-4 w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3">🔒 View Owner Contact — ₹299</button>
 <button id="shareBtn" class="mt-3 w-full rounded-xl bg-slate-950 text-white font-black py-3">Share Property</button>
 <div id="shareMsg" class="text-xs text-emerald-600 mt-2 text-center min-h-4"></div>
 </div>
@@ -56,15 +62,21 @@ function e($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 </div>
 </main>
 
-<div id="contactModal" class="hidden fixed inset-0 z-[100] bg-black/70 p-4 items-center justify-center">
-  <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl relative">
+<div id="contactModal" class="hidden fixed inset-0 z-[100] bg-black/70 p-4 items-center justify-center overflow-y-auto">
+  <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl relative my-4">
     <button id="closeContact" class="absolute right-4 top-4 w-9 h-9 rounded-full bg-slate-100 font-bold">×</button>
     <div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-2xl">🔒</div>
-    <h2 class="text-2xl font-black mt-4">Payment required</h2>
-    <p class="text-slate-600 mt-2">Owner phone number is protected. Buy contact access to unlock the direct owner details for this property.</p>
+    <h2 class="text-2xl font-black mt-4">Unlock Owner Contact</h2>
+    <p class="text-slate-600 mt-2">Pay <b>₹299</b> to unlock the direct owner contact for this property.</p>
     <div class="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm"><div class="text-slate-500">Property</div><div class="font-black mt-1"><?=e($title)?></div><div class="text-xs text-slate-500 mt-2">Reference: <?=e($ref)?></div></div>
-    <button type="button" class="mt-5 w-full rounded-xl bg-emerald-600 text-white font-black py-3" disabled title="Secure payment activation pending">Continue to Payment</button>
-    <p class="text-[11px] text-slate-500 text-center mt-2">No owner contact is revealed before successful payment verification.</p>
+    <div id="paymentBox" class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+      <div class="flex items-center justify-between gap-3"><div><div class="text-xs font-bold text-emerald-700 uppercase">Payable Amount</div><div class="text-3xl font-black text-slate-950">₹299</div></div><span class="rounded-full bg-white px-3 py-1 text-xs font-black text-emerald-700 border border-emerald-200">1 CONTACT</span></div>
+      <div class="mt-4 bg-white rounded-2xl p-4 flex justify-center"><div id="upiQr" aria-label="UPI QR code for ₹299 payment"></div></div>
+      <div class="mt-3 text-center text-xs text-slate-600">Scan with any UPI app — amount ₹299 will be pre-filled.</div>
+      <div class="mt-3 rounded-xl bg-white border border-slate-200 p-3 text-center"><div class="text-xs text-slate-500">UPI ID</div><div class="font-mono font-bold text-sm break-all"><?=e($upiId)?></div></div>
+      <a href="<?=e($upiUri)?>" class="mt-3 block w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 text-center">Pay ₹299 via UPI</a>
+    </div>
+    <p class="text-[11px] text-slate-500 text-center mt-3">Owner contact is revealed only after successful payment verification.</p>
   </div>
 </div>
 
@@ -84,7 +96,10 @@ shareBtn.onclick=async()=>{const u=location.href,t=document.title;try{if(navigat
 const contactModal=document.getElementById('contactModal');
 const contactBtn=document.getElementById('contactBtn');
 const closeContact=document.getElementById('closeContact');
-function openContact(){contactModal.classList.remove('hidden');contactModal.classList.add('flex');document.body.classList.add('no-scroll')}
+const upiUri=<?=json_encode($upiUri, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)?>;
+let qrReady=false;
+function ensureQr(){if(qrReady)return;const box=document.getElementById('upiQr');if(window.QRCode&&box){new QRCode(box,{text:upiUri,width:220,height:220,correctLevel:QRCode.CorrectLevel.M});qrReady=true;}}
+function openContact(){contactModal.classList.remove('hidden');contactModal.classList.add('flex');document.body.classList.add('no-scroll');ensureQr()}
 function hideContact(){contactModal.classList.add('hidden');contactModal.classList.remove('flex');document.body.classList.remove('no-scroll')}
 contactBtn.onclick=openContact;closeContact.onclick=hideContact;contactModal.addEventListener('click',e=>{if(e.target===contactModal)hideContact()});
 <?php if($photos): ?>
