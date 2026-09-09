@@ -57,35 +57,13 @@ function li_audit(array &$record, string $from, string $to, string $by, string $
     if (!isset($record['status_history']) || !is_array($record['status_history'])) $record['status_history'] = [];
     $record['status_history'][] = ['from'=>$from,'to'=>$to,'by'=>$by,'note'=>$note,'at'=>gmdate('c')];
 }
-/**
- * Instant-live policy: any legacy owner listing still sitting in PENDING_VERIFICATION
- * is promoted to LIVE. Explicit moderation states such as REJECTED, PAUSED,
- * NEED_CORRECTION, SOLD and RENTED are never touched because they are not pending.
- */
-function li_publish_legacy_pending_now(): int {
-    $dir = li_property_data_dir(); if (!is_dir($dir)) return 0; $published=0;
-    foreach (glob($dir . '/LI-*.json') ?: [] as $file) {
-        $json=file_get_contents($file); if($json===false)continue;
-        $r=json_decode($json,true); if(!is_array($r))continue;
-        if(($r['status']??'')!=='PENDING_VERIFICATION')continue;
 
-        $now=gmdate('c');
-        $r['status']='LIVE';
-        $r['updated_at']=$now;
-        $r['published_at']=$r['published_at']??$now;
-        $r['verification']=$r['verification']??[];
-        $r['verification']['verified']=false;
-        $r['verification']['verified_at']=null;
-        $r['verification']['verified_by']=null;
-        $r['verification']['notes']='';
-        li_audit($r,'PENDING_VERIFICATION','LIVE','SYSTEM_INSTANT_PUBLISH','Owner listing promoted under instant-live marketplace policy.');
-        if(li_save_property($r))$published++;
-    }
-    return $published;
-}
-function li_auto_publish_unreviewed(int $hours = 24): int { return li_publish_legacy_pending_now(); }
+// Moderation is authoritative. No read/list function is allowed to mutate a property's status.
+// Legacy instant-publish helpers are intentionally kept as no-ops for backward compatibility with old cron calls.
+function li_publish_legacy_pending_now(): int { return 0; }
+function li_auto_publish_unreviewed(int $hours = 24): int { return 0; }
+
 function li_all_properties(): array {
-    li_publish_legacy_pending_now();
     $dir=li_property_data_dir(); if(!is_dir($dir))return []; $records=[];
     foreach(glob($dir.'/LI-*.json')?:[] as $file){$json=file_get_contents($file);if($json===false)continue;$r=json_decode($json,true);if(is_array($r))$records[]=$r;}
     usort($records,fn($a,$b)=>strcmp((string)($b['created_at']??''),(string)($a['created_at']??''))); return $records;
