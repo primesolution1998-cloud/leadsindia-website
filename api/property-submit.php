@@ -47,7 +47,7 @@ if (!is_dir($uploadDir) || !is_writable($uploadDir)) fail(500, 'Upload storage u
 
 $photos = [];
 if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
-    $count = min(count($_FILES['photos']['name']), 10);
+    $count = min(count($_FILES['photos']['name']), 20);
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     for ($i = 0; $i < $count; $i++) {
@@ -64,6 +64,8 @@ if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
         $photos[] = li_property_photo_url($reference, $filename);
     }
 }
+
+if (!$photos) fail(422, 'Please upload at least one property photo.');
 
 $record = [
     'reference_id' => $reference,
@@ -94,10 +96,10 @@ $record = [
         'verified' => false,
         'verified_at' => null,
         'verified_by' => null,
-        'notes' => 'Owner self-published; backend verification pending.',
+        'notes' => '',
     ],
 ];
-li_audit($record, 'NEW', 'LIVE', 'OWNER_SELF_PUBLISH', 'Published immediately after owner onboarding; contact remains hidden.');
+li_audit($record, 'NEW', 'LIVE', 'OWNER_SELF_PUBLISH', 'Owner published property instantly.');
 if (!li_save_property($record)) fail(500, 'Could not save submission.');
 
 http_response_code(201);
