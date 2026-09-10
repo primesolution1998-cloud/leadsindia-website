@@ -13,19 +13,30 @@ $authenticated = rainbow_admin_logged_in();
 $keyConfigured = rainbow_openai_key() !== '';
 $curlAvailable = function_exists('curl_init');
 $probe = ['connected' => false, 'code' => 'not_probed'];
+$metaProbe = ['connected' => false, 'configured' => false, 'code' => 'not_probed', 'account' => null];
 
 if ($adminReady && $authenticated && $keyConfigured && $curlAvailable) {
     $probe = rainbow_probe_openai();
 }
+if ($adminReady && $authenticated && $curlAvailable) {
+    $metaProbe = rainbow_probe_meta();
+}
 
 rainbow_json([
     'ok' => true,
-    'phase' => 1,
+    'phase' => 2,
     'openai' => [
         'configured' => $keyConfigured,
         'model' => rainbow_openai_model(),
         'connected' => (bool) $probe['connected'],
         'probe_code' => (string) $probe['code'],
+    ],
+    'meta' => [
+        'configured' => (bool) $metaProbe['configured'],
+        'connected' => (bool) $metaProbe['connected'],
+        'probe_code' => (string) $metaProbe['code'],
+        'account' => $metaProbe['account'],
+        'read_only' => true,
     ],
     'security' => [
         'admin_configured' => $adminReady,
