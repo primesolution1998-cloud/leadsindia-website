@@ -63,6 +63,47 @@ function rainbow_rate_limit(int $limit=8,int $windowSeconds=60): bool {
 }
 function rainbow_openai_key(): string { return trim((string)(getenv('OPENAI_API_KEY')?:'')); }
 function rainbow_openai_model(): string { $m=trim((string)(getenv('OPENAI_MODEL')?:'gpt-5-mini')); return $m!==''?$m:'gpt-5-mini'; }
+function rainbow_meta_token(): string { return trim((string)(getenv('META_ACCESS_TOKEN')?:'')); }
+function rainbow_meta_ad_account_id(): string { return trim((string)(getenv('META_AD_ACCOUNT_ID')?:'')); }
+
+function rainbow_meta_get(string $path, array $query=[]): array
+{
+    if(!function_exists('curl_init')) return ['ok'=>false,'code'=>'curl_unavailable','http'=>0,'data'=>null];
+    $token=rainbow_meta_token();
+    if($token==='') return ['ok'=>false,'code'=>'meta_not_configured','http'=>0,'data'=>null];
+    $query['access_token']=$token;
+    $url='https://graph.facebook.com/v23.0/'.ltrim($path,'/').'?'.http_build_query($query,'','&',PHP_QUERY_RFC3986);
+    $ch=curl_init($url);
+    curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_CONNECTTIMEOUT=>4,CURLOPT_TIMEOUT=>10,CURLOPT_HTTPHEADER=>['Accept: application/json']]);
+    $raw=curl_exec($ch); $errno=curl_errno($ch); $http=(int)curl_getinfo($ch,CURLINFO_RESPONSE_CODE); curl_close($ch);
+    if($raw===false||$errno!==0) return ['ok'=>false,'code'=>'network_error','http'=>$http,'data'=>null];
+    $decoded=json_decode((string)$raw,true);
+    if(!is_array($decoded)) return ['ok'=>false,'code'=>'invalid_response','http'=>$http,'data'=>null];
+    if($http>=200&&$http<300&&!isset($decoded['error'])) return ['ok'=>true,'code'=>'connected','http'=>$http,'data'=>$decoded];
+    $errorCode=(int)($decoded['error']['code']??0);
+    if($http===401||$http===403||$errorCode===190) return ['ok'=>false,'code'=>'auth_error','http'=>$http,'data'=>null];
+    if($http===429||$errorCode===4||$errorCode===17||$errorCode===32||$errorCode===613) return ['ok'=>false,'code'=>'rate_limited','http'=>$http,'data'=>null];
+    return ['ok'=>false,'code'=>'probe_failed','http'=>$http,'data'=>null];
+}
+
+function rainbow_probe_meta(): array
+{
+    $account=rainbow_meta_ad_account_id();
+    if(rainbow_meta_token()==='') return ['connected'=>false,'configured'=>false,'code'=>'meta_not_configured','account'=>null];
+    if($account==='') return ['connected'=>false,'configured'=>false,'code'=>'meta_account_not_configured','account'=>null];
+    if(!preg_match('/^act_\d+$/',$account)) return ['connected'=>false,'configured'=>false,'code'=>'meta_account_invalid','account'=>null];
+    $result=rainbow_meta_get($account,['fields'=>'id,name,account_status,currency']);
+    if(!$result['ok']) return ['connected'=>false,'configured'=>true,'code'=>(string)$result['code'],'account'=>null];
+    $data=is_array($result['data'])?$result['data']:[];
+    $id=(string)($data['id']??'');
+    if($id!==$account) return ['connected'=>false,'configured'=>true,'code'=>'account_mismatch','account'=>null];
+    return ['connected'=>true,'configured'=>true,'code'=>'connected','account'=>[
+        'id'=>$id,
+        'name'=>(string)($data['name']??''),
+        'status'=>(int)($data['account_status']??0),
+        'currency'=>(string)($data['currency']??''),
+    ]];
+}
 
 function rainbow_extract_output_text(array $decoded): string
 {
