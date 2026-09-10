@@ -32,6 +32,7 @@ try{
         'openai_upstream_error'=>[502,'OpenAI is temporarily unavailable.'],
         'openai_request_error'=>[502,'OpenAI rejected the request.'],
         'openai_invalid_response'=>[502,'OpenAI returned an invalid response.'],
+        'openai_incomplete_response'=>[502,'OpenAI response was incomplete. Please retry the command.'],
         'openai_empty_response'=>[502,'OpenAI returned no plan.'],
         'openai_invalid_json'=>[502,'OpenAI returned malformed plan data.'],
         'openai_schema_mismatch'=>[502,'OpenAI returned a plan that failed validation.']
