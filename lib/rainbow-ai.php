@@ -15,6 +15,17 @@ function rainbow_bootstrap(): void
     header('Referrer-Policy: no-referrer');
     header('Permissions-Policy: microphone=(self)');
     header('Cache-Control: no-store');
+
+    $script = (string)($_SERVER['SCRIPT_NAME'] ?? '');
+    $isRainbowIndex = basename($script) === 'index.php' && str_contains($script, '/rainbow-ai/');
+    if ($isRainbowIndex && $_SERVER['REQUEST_METHOD'] === 'GET' && (string)($_SERVER['QUERY_STRING'] ?? '') !== '') {
+        header('Location: /rainbow-ai/', true, 302);
+        exit;
+    }
+    if ($isRainbowIndex && !rainbow_admin_logged_in()) {
+        header('Location: /rainbow-ai/login.php', true, 302);
+        exit;
+    }
 }
 
 function rainbow_load_private_env(): void
@@ -43,7 +54,7 @@ function rainbow_admin_ready(): bool { return (string)(getenv('LEADSINDIA_ADMIN_
 function rainbow_admin_logged_in(): bool { $expected=(string)(getenv('LEADSINDIA_ADMIN_USER')?:''); return $expected!=='' && isset($_SESSION['li_admin']) && hash_equals($expected,(string)$_SESSION['li_admin']); }
 function rainbow_require_admin_json(): void {
     if (!rainbow_admin_ready()) rainbow_json(['ok'=>false,'code'=>'admin_not_configured','message'=>'Rainbow AI execution is locked until LeadsIndia admin authentication is configured.'],503);
-    if (!rainbow_admin_logged_in()) rainbow_json(['ok'=>false,'code'=>'authentication_required','message'=>'Admin sign-in is required before sending commands.','login_url'=>'/admin/login.php'],401);
+    if (!rainbow_admin_logged_in()) rainbow_json(['ok'=>false,'code'=>'authentication_required','message'=>'Rainbow AI sign-in is required before sending commands.','login_url'=>'/rainbow-ai/login.php'],401);
 }
 function rainbow_rate_limit(int $limit=8,int $windowSeconds=60): bool {
     $now=time(); $events=$_SESSION['rainbow_rate']??[]; if(!is_array($events))$events=[];
