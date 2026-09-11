@@ -5,6 +5,9 @@ require dirname(__DIR__) . '/lib/rainbow-ai.php';
 if (!function_exists('rainbow_whatsapp_probe')) {
     require dirname(__DIR__) . '/lib/rainbow-whatsapp.php';
 }
+if (!function_exists('li_cmts_probe')) {
+    require dirname(__DIR__) . '/lib/cmts-client.php';
+}
 rainbow_bootstrap();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -18,6 +21,7 @@ $curlAvailable = function_exists('curl_init');
 $probe = ['connected' => false, 'code' => 'not_probed'];
 $metaProbe = ['connected' => false, 'configured' => false, 'code' => 'not_probed', 'account' => null];
 $whatsappProbe = ['connected' => false, 'configured' => false, 'code' => 'not_probed', 'phone' => null];
+$crmProbe = ['connected' => false, 'configured' => li_cmts_configured(), 'code' => 'not_probed', 'http' => 0];
 
 if ($adminReady && $authenticated && $keyConfigured && $curlAvailable) {
     $probe = rainbow_probe_openai();
@@ -25,6 +29,7 @@ if ($adminReady && $authenticated && $keyConfigured && $curlAvailable) {
 if ($adminReady && $authenticated && $curlAvailable) {
     $metaProbe = rainbow_probe_meta();
     $whatsappProbe = rainbow_whatsapp_probe();
+    $crmProbe = li_cmts_probe();
 }
 
 rainbow_json([
@@ -48,6 +53,14 @@ rainbow_json([
         'connected' => (bool) $whatsappProbe['connected'],
         'probe_code' => (string) $whatsappProbe['code'],
         'phone' => $whatsappProbe['phone'],
+        'read_only' => true,
+    ],
+    'crm' => [
+        'provider' => 'CMTS',
+        'configured' => (bool) $crmProbe['configured'],
+        'connected' => (bool) $crmProbe['connected'],
+        'probe_code' => (string) $crmProbe['code'],
+        'http' => (int) $crmProbe['http'],
         'read_only' => true,
     ],
     'security' => [
