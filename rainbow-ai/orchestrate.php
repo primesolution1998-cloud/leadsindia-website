@@ -18,9 +18,53 @@ $command=trim((string)($body['command']??''));
 $length=function_exists('mb_strlen')?mb_strlen($command,'UTF-8'):strlen($command);
 if($length<3||$length>4000) rainbow_json(['ok'=>false,'code'=>'invalid_command','message'=>'Command must be between 3 and 4000 characters.'],422);
 if(preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u',$command)) rainbow_json(['ok'=>false,'code'=>'invalid_command','message'=>'Command contains unsupported control characters.'],422);
+
+function rainbow_activate_business_owner(array $plan): array
+{
+    $agents = $plan['required_agents'] ?? [];
+    if (!is_array($agents)) $agents = [];
+    $agents = array_values(array_filter(array_map(static fn($v): string => trim((string)$v), $agents), static fn(string $v): bool => $v !== '' && strcasecmp($v, 'Business Owner') !== 0));
+    array_unshift($agents, 'Business Owner');
+    $plan['required_agents'] = $agents;
+
+    $steps = $plan['steps'] ?? [];
+    if (!is_array($steps)) $steps = [];
+    $ownerStep = [
+        'step_number' => 1,
+        'agent' => 'Business Owner',
+        'action' => 'Interpret the business objective, set priority and risk boundaries, then route the work to the required specialist agents. External execution remains approval-gated.',
+        'execution_allowed' => false,
+    ];
+    $normalised = [$ownerStep];
+    $n = 2;
+    foreach ($steps as $step) {
+        if (!is_array($step)) continue;
+        if (strcasecmp((string)($step['agent'] ?? ''), 'Business Owner') === 0) continue;
+        $step['step_number'] = $n++;
+        $step['execution_allowed'] = false;
+        $normalised[] = $step;
+    }
+    $plan['steps'] = $normalised;
+    return $plan;
+}
+
 try{
     $result=rainbow_openai_request($command);
-    rainbow_json(['ok'=>true,'state'=>'success','execution_performed'=>false,'plan'=>$result['plan'],'meta'=>['response_id'=>$result['response_id'],'model'=>$result['model']]]);
+    $plan=rainbow_activate_business_owner($result['plan']);
+    rainbow_json([
+        'ok'=>true,
+        'state'=>'success',
+        'execution_performed'=>false,
+        'orchestrator'=>[
+            'name'=>'Business Owner',
+            'status'=>'active',
+            'mode'=>'approval_first',
+            'scope'=>'planning_routing_and_risk_control',
+            'external_execution'=>false,
+        ],
+        'plan'=>$plan,
+        'meta'=>['response_id'=>$result['response_id'],'model'=>$result['model']]
+    ]);
 }catch(RuntimeException $e){
     $code=$e->getMessage();
     $map=[
