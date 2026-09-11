@@ -48,9 +48,59 @@ function rainbow_activate_business_owner(array $plan): array
     return $plan;
 }
 
+function rainbow_product_manager_required(string $command, array $plan): bool
+{
+    $agents=$plan['required_agents']??[];
+    if(is_array($agents)){
+        foreach($agents as $agent){
+            $name=strtolower(trim((string)$agent));
+            if(in_array($name,['product manager','product','product specialist','product management'],true)) return true;
+        }
+    }
+    return (bool)preg_match('/\b(product|feature|roadmap|requirement|requirements|user story|user stories|acceptance criteria|mvp|launch scope|prioriti[sz]e|backlog|ux flow|customer journey|pricing plan|subscription plan)\b/i',$command);
+}
+
+function rainbow_activate_product_manager(array $plan): array
+{
+    $agents=$plan['required_agents']??[];
+    if(!is_array($agents)) $agents=[];
+    $normalisedAgents=[];
+    foreach($agents as $agent){
+        $name=trim((string)$agent);
+        if($name==='' || strcasecmp($name,'Product Manager')===0 || strcasecmp($name,'Product')===0 || strcasecmp($name,'Product Specialist')===0 || strcasecmp($name,'Product Management')===0) continue;
+        $normalisedAgents[]=$name;
+    }
+    $insertAt=(isset($normalisedAgents[0]) && strcasecmp($normalisedAgents[0],'Business Owner')===0)?1:0;
+    array_splice($normalisedAgents,$insertAt,0,['Product Manager']);
+    $plan['required_agents']=array_values(array_unique($normalisedAgents));
+
+    $steps=$plan['steps']??[];
+    if(!is_array($steps)) $steps=[];
+    $owner=[];$other=[];
+    foreach($steps as $step){
+        if(!is_array($step)) continue;
+        $agent=(string)($step['agent']??'');
+        if(strcasecmp($agent,'Business Owner')===0){$owner[]=$step;continue;}
+        if(in_array(strtolower(trim($agent)),['product manager','product','product specialist','product management'],true)) continue;
+        $other[]=$step;
+    }
+    $pmStep=[
+        'step_number'=>0,
+        'agent'=>'Product Manager',
+        'action'=>'Translate the objective into product requirements, target-user outcome, prioritized scope, acceptance criteria, dependencies and measurable success criteria before downstream work is planned.',
+        'execution_allowed'=>false,
+    ];
+    $merged=array_merge($owner,[$pmStep],$other);
+    foreach($merged as $i=>&$step){$step['step_number']=$i+1;$step['execution_allowed']=false;} unset($step);
+    $plan['steps']=$merged;
+    return $plan;
+}
+
 try{
     $result=rainbow_openai_request($command);
     $plan=rainbow_activate_business_owner($result['plan']);
+    $productActive=rainbow_product_manager_required($command,$plan);
+    if($productActive) $plan=rainbow_activate_product_manager($plan);
     rainbow_json([
         'ok'=>true,
         'state'=>'success',
@@ -61,6 +111,9 @@ try{
             'mode'=>'approval_first',
             'scope'=>'planning_routing_and_risk_control',
             'external_execution'=>false,
+        ],
+        'specialists'=>[
+            ['name'=>'Product Manager','status'=>$productActive?'active':'ready','mode'=>'planning_only','scope'=>'product_strategy_requirements_prioritization_acceptance_criteria','external_execution'=>false]
         ],
         'plan'=>$plan,
         'meta'=>['response_id'=>$result['response_id'],'model'=>$result['model']]
