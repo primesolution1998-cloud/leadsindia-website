@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 require dirname(__DIR__) . '/lib/rainbow-ai.php';
+if (!function_exists('rainbow_whatsapp_probe')) {
+    require dirname(__DIR__) . '/lib/rainbow-whatsapp.php';
+}
 rainbow_bootstrap();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -14,12 +17,14 @@ $keyConfigured = rainbow_openai_key() !== '';
 $curlAvailable = function_exists('curl_init');
 $probe = ['connected' => false, 'code' => 'not_probed'];
 $metaProbe = ['connected' => false, 'configured' => false, 'code' => 'not_probed', 'account' => null];
+$whatsappProbe = ['connected' => false, 'configured' => false, 'code' => 'not_probed', 'phone' => null];
 
 if ($adminReady && $authenticated && $keyConfigured && $curlAvailable) {
     $probe = rainbow_probe_openai();
 }
 if ($adminReady && $authenticated && $curlAvailable) {
     $metaProbe = rainbow_probe_meta();
+    $whatsappProbe = rainbow_whatsapp_probe();
 }
 
 rainbow_json([
@@ -36,6 +41,13 @@ rainbow_json([
         'connected' => (bool) $metaProbe['connected'],
         'probe_code' => (string) $metaProbe['code'],
         'account' => $metaProbe['account'],
+        'read_only' => true,
+    ],
+    'whatsapp' => [
+        'configured' => (bool) $whatsappProbe['configured'],
+        'connected' => (bool) $whatsappProbe['connected'],
+        'probe_code' => (string) $whatsappProbe['code'],
+        'phone' => $whatsappProbe['phone'],
         'read_only' => true,
     ],
     'security' => [
