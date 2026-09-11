@@ -13,6 +13,40 @@ function li_cmts_configured(): bool {
     return trim((string)getenv('LEADSINDIA_CMTS_URL')) !== '' && strlen((string)getenv('LEADSINDIA_CMTS_SECRET')) >= 32;
 }
 
+function li_cmts_probe(): array {
+    $configured = li_cmts_configured();
+    if (!$configured) return ['configured'=>false,'connected'=>false,'code'=>'cmts_not_configured','http'=>0];
+    if (!function_exists('curl_init')) return ['configured'=>true,'connected'=>false,'code'=>'curl_unavailable','http'=>0];
+
+    $base = trim((string)getenv('LEADSINDIA_CMTS_URL'));
+    $parts = parse_url($base);
+    $scheme = strtolower((string)($parts['scheme'] ?? ''));
+    if (!in_array($scheme, ['https','http'], true) || empty($parts['host'])) {
+        return ['configured'=>true,'connected'=>false,'code'=>'cmts_url_invalid','http'=>0];
+    }
+
+    $url = rtrim($base, '/') . '/api/v1/leadsindia/approval';
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_NOBODY=>true,
+        CURLOPT_RETURNTRANSFER=>true,
+        CURLOPT_FOLLOWLOCATION=>false,
+        CURLOPT_CONNECTTIMEOUT=>4,
+        CURLOPT_TIMEOUT=>8,
+        CURLOPT_HTTPHEADER=>['Accept: application/json'],
+    ]);
+    $response = curl_exec($ch);
+    $errno = curl_errno($ch);
+    $http = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+
+    if ($response === false || $errno !== 0 || $http === 0) {
+        return ['configured'=>true,'connected'=>false,'code'=>'network_error','http'=>$http];
+    }
+
+    return ['configured'=>true,'connected'=>true,'code'=>'reachable','http'=>$http];
+}
+
 function li_cmts_build_event(array $record): array {
     $owner = is_array($record['owner'] ?? null) ? $record['owner'] : [];
     $property = is_array($record['property'] ?? null) ? $record['property'] : [];
