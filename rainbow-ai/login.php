@@ -50,13 +50,13 @@ $csrf = rainbow_csrf_token();
 <form class="card" method="post" action="/rainbow-ai/login.php" autocomplete="on">
 <div class="brand">Rainbow AI</div><div class="spectrum"></div>
 <h1>Secure Admin Login</h1>
-<p>Sign in to unlock OpenAI verification and command planning.</p>
+<p>Sign in to use protected multi-agent planning and internal deliverable execution.</p>
 <?php if ($error !== ''): ?><div class="error"><?=htmlspecialchars($error, ENT_QUOTES, 'UTF-8')?></div><?php endif; ?>
 <input type="hidden" name="csrf" value="<?=htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8')?>">
 <label for="user">Username</label><input id="user" name="user" required autocomplete="username" autofocus>
 <label for="password">Password</label><input id="password" type="password" name="password" required autocomplete="current-password">
 <button type="submit">Sign in to Rainbow AI</button>
-<div class="note">Phase 1 only prepares plans. It does not publish, spend, send bulk messages, or modify CRM data.</div>
+<div class="note">Internal content execution is allowed. Spending, external publishing, bulk messaging, CRM mutations and security-sensitive actions remain approval-gated.</div>
 </form>
 </body>
 </html>
