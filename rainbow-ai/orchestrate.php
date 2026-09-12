@@ -35,6 +35,12 @@ try{
         if($task===''||$agent==='Business Owner') continue;
         $steps[]=['step_number'=>count($steps)+1,'agent'=>$agent,'action'=>$task,'execution_allowed'=>$globalApproval===null&&(bool)($step['execution_allowed']??false)];
     }
+    foreach($steps as $step){
+        if(!rainbow_task_respects_context($context,(string)$step['action'])){
+            $steps=[['step_number'=>1,'agent'=>'Project Manager','action'=>$command,'execution_allowed'=>$globalApproval===null]];
+            break;
+        }
+    }
 
     $forceExecute=(bool)preg_match('/\b(execute|produce(?: the)? deliverable|completed|create|write|design|revise|proofread|do not create another plan|now)\b/i',$command);
     if($forceExecute&&$globalApproval===null&&count($steps)===0){
