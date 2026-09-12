@@ -25,7 +25,7 @@ function li_cmts_probe(): array {
         return ['configured'=>true,'connected'=>false,'code'=>'cmts_url_invalid','http'=>0];
     }
 
-    $url = rtrim($base, '/') . '/api/v1/leadsindia/approval';
+    $url = rtrim($base, '/') . '/api/v1/leadsindia/approval/';
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_NOBODY=>true,
@@ -95,7 +95,7 @@ function li_cmts_dispatch_file(string $file): array {
     $ts = (string)time();
     $secret = (string)getenv('LEADSINDIA_CMTS_SECRET');
     $sig = hash_hmac('sha256', $ts . '.' . $body, $secret);
-    $url = rtrim((string)getenv('LEADSINDIA_CMTS_URL'), '/') . '/api/v1/leadsindia/approval';
+    $url = rtrim((string)getenv('LEADSINDIA_CMTS_URL'), '/') . '/api/v1/leadsindia/approval/';
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [CURLOPT_POST=>true,CURLOPT_POSTFIELDS=>$body,CURLOPT_RETURNTRANSFER=>true,CURLOPT_CONNECTTIMEOUT=>5,CURLOPT_TIMEOUT=>12,CURLOPT_HTTPHEADER=>['Content-Type: application/json','X-LeadsIndia-Timestamp: '.$ts,'X-LeadsIndia-Signature: '.$sig]]);
