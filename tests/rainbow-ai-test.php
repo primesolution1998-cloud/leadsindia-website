@@ -17,6 +17,9 @@ $context=rainbow_build_context('YTC Library project. Create a project brief for 
 expect_true($context['project_name']==='YTC Library','Context isolation failed');
 expect_true($context['business']==='YTC Education','Business isolation failed');
 expect_true(rainbow_external_approval_reason($context['objective'])===null,'Negated publish was incorrectly blocked');
+$definitionContext=rainbow_build_context('Create a YTC Library project brief and first 2 sample chapters. Do not publish or modify external systems.');
+expect_true($definitionContext['project_name']==='YTC Library','Definition-of-done wording isolation failed');
+expect_true(!rainbow_task_respects_context($definitionContext,'Create a LeadsIndia real estate marketing campaign.'),'Foreign-context guard failed');
 
 $pm=rainbow_run_agent($context,'Project Manager','Produce the completed project brief now.',[]);
 expect_true($pm['status']==='completed'&&str_contains((string)$pm['output'],'YTC Library'),'Project Manager execution failed');
