@@ -20,6 +20,37 @@ $length=function_exists('mb_strlen')?mb_strlen($command,'UTF-8'):strlen($command
 if($length<3||$length>4000) rainbow_json(['ok'=>false,'code'=>'invalid_command','message'=>'Command must be between 3 and 4000 characters.'],422);
 if(preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u',$command)) rainbow_json(['ok'=>false,'code'=>'invalid_command','message'=>'Command contains unsupported control characters.'],422);
 
+function rainbow_project_progress_payload(array $context,array $plan,array $executions): array
+{
+    $projectId=(string)($context['project_id']??'');
+    $history=$projectId!==''?rainbow_recent_project_outputs($projectId,8):[];
+    $tasks=[];$seen=[];
+    foreach($history as $row){
+        $agent=(string)($row['agent']??'Project Manager');$task=trim((string)($row['task']??''));
+        if($task==='') continue;
+        $key=strtolower($agent.'|'.$task);$seen[$key]=true;
+        $tasks[]=['agent'=>$agent,'task'=>$task,'status'=>'completed','execution_id'=>(string)($row['execution_id']??'')];
+    }
+    foreach(($plan['steps']??[]) as $step){
+        if(!is_array($step)) continue;
+        $agent=(string)($step['agent']??'Project Manager');$task=trim((string)($step['action']??''));
+        if($task==='') continue;
+        $key=strtolower($agent.'|'.$task);if(isset($seen[$key])) continue;
+        $status='planned';$executionId='';
+        foreach($executions as $execution){
+            if(!is_array($execution)) continue;
+            if(strcasecmp((string)($execution['agent']??''),$agent)===0&&trim((string)($execution['task']??''))===$task){
+                $status=(string)($execution['status']??'planned');$executionId=(string)($execution['execution_id']??'');break;
+            }
+        }
+        $tasks[]=['agent'=>$agent,'task'=>$task,'status'=>$status,'execution_id'=>$executionId];
+    }
+    $completed=count(array_filter($tasks,static fn(array $task):bool=>($task['status']??'')==='completed'));
+    $statuses=array_column($tasks,'status');
+    $status=in_array('failed',$statuses,true)?'failed':(in_array('blocked_for_approval',$statuses,true)?'blocked_for_approval':($completed===count($tasks)&&count($tasks)>0?'completed':'running'));
+    return ['workflow_id'=>'','status'=>$status,'completed_steps'=>$completed,'total_steps'=>count($tasks),'tasks'=>$tasks,'error'=>null,'source'=>'persisted_project_history','project_id'=>$projectId,'project_name'=>(string)($context['project_name']??'')];
+}
+
 try{
     $context=rainbow_build_context($command);
     $autoMode=(bool)($body['auto_mode']??false);
@@ -84,9 +115,10 @@ try{
     $plan['approvals_required']=$globalApproval!==null?[['type'=>$globalApproval,'reason'=>'External or sensitive action is approval-gated and was not executed.']]:[];
     $statuses=array_column($executions,'status');
     $state=in_array('failed',$statuses,true)?'failed':(in_array('blocked_for_approval',$statuses,true)?'blocked_for_approval':(count($executions)>0&&count(array_filter($statuses,static fn($s)=>$s==='completed'))===count($executions)?'completed':'planned'));
+    $projectProgress=rainbow_project_progress_payload($context,$plan,$executions);
     rainbow_json([
         'ok'=>true,'state'=>$state,'execution_performed'=>in_array('completed',$statuses,true),
-        'context'=>$context,'plan'=>$plan,'executions'=>$executions,
+        'context'=>$context,'plan'=>$plan,'executions'=>$executions,'auto_workflow'=>$projectProgress,
         'orchestrator'=>['name'=>'Business Owner','status'=>'completed','mode'=>'planner','external_execution'=>false],
         'specialists'=>array_map(static fn(array $e):array=>['name'=>$e['agent'],'status'=>$e['status'],'execution_id'=>$e['execution_id']],$executions),
         'meta'=>['response_id'=>$result['response_id'],'model'=>$result['model']]
