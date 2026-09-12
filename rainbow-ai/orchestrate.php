@@ -58,7 +58,9 @@ try{
         $executions[]=$blocked;
         $steps=[['step_number'=>1,'agent'=>$blocked['agent'],'action'=>$command,'execution_allowed'=>false]];
     }else{
-        foreach(array_slice($steps,0,4) as $step){
+        // One specialist per web request keeps execution within shared-hosting timeouts.
+        // Completed output is persisted and becomes the next command's handoff context.
+        foreach(array_slice($steps,0,1) as $step){
             if(!$forceExecute&&empty($step['execution_allowed'])) continue;
             $execution=rainbow_run_agent($context,$step['agent'],$step['action'],$prior);
             $executions[]=$execution;
