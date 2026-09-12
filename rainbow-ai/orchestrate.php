@@ -22,9 +22,10 @@ if(preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u',$command)) rainbow_json(['ok'=>f
 
 try{
     $context=rainbow_build_context($command);
-    $plannerInput=json_encode(['project_context'=>$context,'user_command'=>$command],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
-    $result=rainbow_openai_request((string)$plannerInput);
-    $plan=$result['plan'];
+    // Planning and safety routing are deterministic and local. Only the specialist
+    // executor calls OpenAI, keeping production requests inside hosting limits.
+    $plan=rainbow_local_plan($context,$command);
+    $result=['response_id'=>null,'model'=>rainbow_openai_model()];
     $prior=rainbow_recent_project_outputs((string)$context['project_id']);
     $executions=[];$steps=[];$globalApproval=rainbow_external_approval_reason($command);
 
@@ -32,7 +33,7 @@ try{
         if(!is_array($step)) continue;
         $agent=rainbow_allowed_agent((string)($step['agent']??''));
         $task=trim((string)($step['action']??''));
-        if($task===''||$agent==='Business Owner') continue;
+        if($task==='') continue;
         $steps[]=['step_number'=>count($steps)+1,'agent'=>$agent,'action'=>$task,'execution_allowed'=>$globalApproval===null&&(bool)($step['execution_allowed']??false)];
     }
     foreach($steps as $step){
