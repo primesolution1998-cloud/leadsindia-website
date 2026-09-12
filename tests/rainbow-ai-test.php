@@ -53,7 +53,7 @@ expect_true($advanced['workflow']['cursor']===1&&$advanced['workflow']['status']
 expect_true(($advanced['execution']['status']??'')==='completed'&&($advanced['execution']['agent']??'')==='Editor / Proofreader','Auto workflow specialist execution failed');
 $storedWorkflow=rainbow_load_workflow((string)$workflow['workflow_id']);
 expect_true($storedWorkflow['cursor']===1&&count($storedWorkflow['execution_ids'])===1,'Auto workflow persistence failed');
-$foreignContext=rainbow_build_context('LeadsIndia marketing campaign.');
+$foreignContext=rainbow_build_context('LeadsIndia project. Create a marketing campaign.');
 try{rainbow_start_book_workflow($foreignContext,'Run Auto Mode.');expect_true(false,'Unsupported Auto Mode project was accepted');}catch(RuntimeException $e){expect_true($e->getMessage()==='auto_mode_project_unsupported','Unexpected Auto Mode guard error');}
 $endpoint=(string)file_get_contents(dirname(__DIR__).'/rainbow-ai/orchestrate.php');
 expect_true(str_contains($endpoint,'array_slice($steps,0,1)'),'Shared-hosting execution bound missing');
