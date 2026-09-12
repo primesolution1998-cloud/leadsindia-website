@@ -243,9 +243,18 @@ function rainbow_load_project(string $projectId): ?array
 
 function rainbow_extract_explicit_project(string $command): ?string
 {
+    if(preg_match('/^\s*(?:create|start|open)\s+(?:a\s+|the\s+)?([A-Za-z0-9][A-Za-z0-9 &_.-]{1,80}?)\s+project(?:\s+brief)?\b/i',$command,$m)) return trim($m[1]);
     if(preg_match('/^\s*([A-Za-z0-9][A-Za-z0-9 &_.-]{1,80}?)\s+project\b/i',$command,$m)) return trim($m[1]);
     if(preg_match('/\bproject\s*[:=-]\s*([A-Za-z0-9][A-Za-z0-9 &_.-]{1,80})/i',$command,$m)) return trim($m[1]);
     return null;
+}
+
+function rainbow_task_respects_context(array $context,string $task): bool
+{
+    $business=strtolower((string)($context['business']??''));
+    if(!str_contains($business,'leadsindia')&&preg_match('/\bLeads\s*India\b|\bLeadsIndia\b/i',$task)) return false;
+    if(str_contains($business,'ytc')&&preg_match('/\b(real estate|property campaign|loan campaign)\b/i',$task)) return false;
+    return true;
 }
 
 function rainbow_build_context(string $command): array
