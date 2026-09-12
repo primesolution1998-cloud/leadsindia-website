@@ -243,10 +243,25 @@ function rainbow_load_project(string $projectId): ?array
 
 function rainbow_extract_explicit_project(string $command): ?string
 {
+    // Known project names stated anywhere in a follow-up command take priority
+    // over role/task wording at the start of the sentence.
+    if(preg_match('/\bYTC\s+Library(?:\s+project)?\b/i',$command)) return 'YTC Library';
     if(preg_match('/^\s*(?:create|start|open)\s+(?:a\s+|the\s+)?([A-Za-z0-9][A-Za-z0-9 &_.-]{1,80}?)\s+project(?:\s+brief)?\b/i',$command,$m)) return trim($m[1]);
-    if(preg_match('/^\s*([A-Za-z0-9][A-Za-z0-9 &_.-]{1,80}?)\s+project\b/i',$command,$m)) return trim($m[1]);
+    if(preg_match('/^\s*([A-Za-z0-9][A-Za-z0-9 &_\-]{1,50}?)\s+project\b/i',$command,$m)) return trim($m[1]);
     if(preg_match('/\bproject\s*[:=-]\s*([A-Za-z0-9][A-Za-z0-9 &_.-]{1,80})/i',$command,$m)) return trim($m[1]);
     return null;
+}
+
+function rainbow_normalize_deliverable(string $output): string
+{
+    $trimmed=trim($output);
+    if(str_starts_with($trimmed,'```')){
+        $trimmed=preg_replace('/^```(?:json)?\s*/i','',$trimmed)??$trimmed;
+        $trimmed=preg_replace('/\s*```$/','',$trimmed)??$trimmed;
+    }
+    $decoded=json_decode(trim($trimmed),true);
+    if(is_array($decoded)&&isset($decoded['content'])&&is_string($decoded['content'])&&trim($decoded['content'])!=='') return trim($decoded['content']);
+    return trim($output);
 }
 
 function rainbow_task_respects_context(array $context,string $task): bool
@@ -364,7 +379,7 @@ function rainbow_openai_executor(array $context,string $agent,string $task,array
     if($http===401||$http===403) throw new RuntimeException('openai_auth_error');
     if($http===429) throw new RuntimeException('openai_rate_limited');
     if($http<200||$http>=300) throw new RuntimeException($http>=500?'openai_upstream_error':'openai_request_error');
-    $output=rainbow_extract_output_text($decoded);if($output==='') throw new RuntimeException('openai_empty_response');
+    $output=rainbow_normalize_deliverable(rainbow_extract_output_text($decoded));if($output==='') throw new RuntimeException('openai_empty_response');
     return ['output'=>$output,'response_id'=>is_string($decoded['id']??null)?$decoded['id']:null];
 }
 
