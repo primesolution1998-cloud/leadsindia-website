@@ -20,6 +20,11 @@ expect_true(rainbow_external_approval_reason($context['objective'])===null,'Nega
 $definitionContext=rainbow_build_context('Create a YTC Library project brief and first 2 sample chapters. Do not publish or modify external systems.');
 expect_true($definitionContext['project_name']==='YTC Library','Definition-of-done wording isolation failed');
 expect_true(!rainbow_task_respects_context($definitionContext,'Create a LeadsIndia real estate marketing campaign.'),'Foreign-context guard failed');
+$followup='Act as Content Writer. Using the completed YTC Library project brief already stored, produce Chapter 1.';
+expect_true(rainbow_extract_explicit_project($followup)==='YTC Library','Follow-up project parsing failed');
+$followupContext=rainbow_build_context($followup);
+expect_true($followupContext['project_id']===$context['project_id']&&$followupContext['project_name']==='YTC Library','Follow-up context handoff isolation failed');
+expect_true(rainbow_normalize_deliverable('{"project_id":"wrong","content":"# Chapter 1\\n\\nHello"}')==="# Chapter 1\n\nHello",'JSON deliverable normalization failed');
 $localPlan=rainbow_local_plan($context,'Act as Project Manager and produce the completed project brief now. Do not create another plan.');
 expect_true($localPlan['steps'][0]['agent']==='Project Manager'&&$localPlan['steps'][0]['execution_allowed']===true,'Local planner routing failed');
 $writerPlan=rainbow_local_plan($context,'Act as Content Writer and write the first sample chapter.');
