@@ -20,6 +20,12 @@ expect_true(rainbow_external_approval_reason($context['objective'])===null,'Nega
 $definitionContext=rainbow_build_context('Create a YTC Library project brief and first 2 sample chapters. Do not publish or modify external systems.');
 expect_true($definitionContext['project_name']==='YTC Library','Definition-of-done wording isolation failed');
 expect_true(!rainbow_task_respects_context($definitionContext,'Create a LeadsIndia real estate marketing campaign.'),'Foreign-context guard failed');
+$localPlan=rainbow_local_plan($context,'Act as Project Manager and produce the completed project brief now. Do not create another plan.');
+expect_true($localPlan['steps'][0]['agent']==='Project Manager'&&$localPlan['steps'][0]['execution_allowed']===true,'Local planner routing failed');
+$writerPlan=rainbow_local_plan($context,'Act as Content Writer and write the first sample chapter.');
+expect_true($writerPlan['steps'][0]['agent']==='Content Writer','Explicit specialist routing failed');
+$safePlan=rainbow_local_plan($context,'Publish a Meta campaign and spend INR 500.');
+expect_true($safePlan['steps'][0]['execution_allowed']===false&&count($safePlan['approvals_required'])===1,'Local planner approval gate failed');
 
 $pm=rainbow_run_agent($context,'Project Manager','Produce the completed project brief now.',[]);
 expect_true($pm['status']==='completed'&&str_contains((string)$pm['output'],'YTC Library'),'Project Manager execution failed');
@@ -37,6 +43,10 @@ foreach([$pm,$writer,$editor,$blocked] as $run){
 }
 $endpoint=(string)file_get_contents(dirname(__DIR__).'/rainbow-ai/orchestrate.php');
 expect_true(str_contains($endpoint,'array_slice($steps,0,1)'),'Shared-hosting execution bound missing');
+expect_true(str_contains($endpoint,'rainbow_local_plan($context,$command)'),'Single-OpenAI-call execution path missing');
+expect_true(!str_contains($endpoint,'rainbow_openai_request((string)$plannerInput)'),'Serial planner API call still present');
+$library=(string)file_get_contents(dirname(__DIR__).'/lib/rainbow-ai.php');
+expect_true(str_contains($library,"'max_output_tokens'=>3500"),'Executor output bound missing');
 $frontend=(string)file_get_contents(dirname(__DIR__).'/rainbow-ai/index.php');
 expect_true(str_contains($frontend,"includes('application/json')"),'Non-JSON response guard missing');
 echo "PASS context_isolation\nPASS real_execution\nPASS multi_agent_handoff\nPASS safety_gate\nPASS persistence\nPASS timeout_protection\n";
