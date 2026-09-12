@@ -35,4 +35,8 @@ foreach([$pm,$writer,$editor,$blocked] as $run){
     $stored=json_decode((string)file_get_contents(rainbow_execution_dir().'/'.$run['execution_id'].'.json'),true);
     expect_true(is_array($stored)&&$stored['status']===$run['status'],'Persistence check failed');
 }
-echo "PASS context_isolation\nPASS real_execution\nPASS multi_agent_handoff\nPASS safety_gate\nPASS persistence\n";
+$endpoint=(string)file_get_contents(dirname(__DIR__).'/rainbow-ai/orchestrate.php');
+expect_true(str_contains($endpoint,'array_slice($steps,0,1)'),'Shared-hosting execution bound missing');
+$frontend=(string)file_get_contents(dirname(__DIR__).'/rainbow-ai/index.php');
+expect_true(str_contains($frontend,"includes('application/json')"),'Non-JSON response guard missing');
+echo "PASS context_isolation\nPASS real_execution\nPASS multi_agent_handoff\nPASS safety_gate\nPASS persistence\nPASS timeout_protection\n";
