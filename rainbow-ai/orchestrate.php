@@ -10,7 +10,8 @@ $contentType=strtolower((string)($_SERVER['CONTENT_TYPE']??''));
 if(!str_starts_with($contentType,'application/json')) rainbow_json(['ok'=>false,'code'=>'invalid_content_type','message'=>'application/json required.'],415);
 $raw=file_get_contents('php://input');
 if($raw===false||strlen($raw)>20000) rainbow_json(['ok'=>false,'code'=>'invalid_request','message'=>'Request is too large or unreadable.'],400);
-$body=json_decode($raw,true); if(!is_array($body)) rainbow_json(['ok'=>false,'code'=>'invalid_json','message'=>'Invalid JSON request.'],400);
+$body=json_decode($raw,true);
+if(!is_array($body)) rainbow_json(['ok'=>false,'code'=>'invalid_json','message'=>'Invalid JSON request.'],400);
 $csrf=(string)($_SERVER['HTTP_X_CSRF_TOKEN']??($body['csrf']??''));
 if(!rainbow_verify_csrf($csrf)) rainbow_json(['ok'=>false,'code'=>'csrf_failed','message'=>'Security token expired. Refresh and try again.'],403);
 if(!rainbow_rate_limit()) rainbow_json(['ok'=>false,'code'=>'rate_limited','message'=>'Too many commands. Wait a minute and try again.'],429);
@@ -19,121 +20,68 @@ $length=function_exists('mb_strlen')?mb_strlen($command,'UTF-8'):strlen($command
 if($length<3||$length>4000) rainbow_json(['ok'=>false,'code'=>'invalid_command','message'=>'Command must be between 3 and 4000 characters.'],422);
 if(preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u',$command)) rainbow_json(['ok'=>false,'code'=>'invalid_command','message'=>'Command contains unsupported control characters.'],422);
 
-function rainbow_activate_business_owner(array $plan): array
-{
-    $agents = $plan['required_agents'] ?? [];
-    if (!is_array($agents)) $agents = [];
-    $agents = array_values(array_filter(array_map(static fn($v): string => trim((string)$v), $agents), static fn(string $v): bool => $v !== '' && strcasecmp($v, 'Business Owner') !== 0));
-    array_unshift($agents, 'Business Owner');
-    $plan['required_agents'] = $agents;
+try{
+    $context=rainbow_build_context($command);
+    $plannerInput=json_encode(['project_context'=>$context,'user_command'=>$command],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+    $result=rainbow_openai_request((string)$plannerInput);
+    $plan=$result['plan'];
+    $prior=rainbow_recent_project_outputs((string)$context['project_id']);
+    $executions=[];$steps=[];$globalApproval=rainbow_external_approval_reason($command);
 
-    $steps = $plan['steps'] ?? [];
-    if (!is_array($steps)) $steps = [];
-    $ownerStep = [
-        'step_number' => 1,
-        'agent' => 'Business Owner',
-        'action' => 'Interpret the business objective, set priority and risk boundaries, then route the work to the required specialist agents. External execution remains approval-gated.',
-        'execution_allowed' => false,
-    ];
-    $normalised = [$ownerStep];
-    $n = 2;
-    foreach ($steps as $step) {
-        if (!is_array($step)) continue;
-        if (strcasecmp((string)($step['agent'] ?? ''), 'Business Owner') === 0) continue;
-        $step['step_number'] = $n++;
-        $step['execution_allowed'] = false;
-        $normalised[] = $step;
+    foreach(($plan['steps']??[]) as $step){
+        if(!is_array($step)) continue;
+        $agent=rainbow_allowed_agent((string)($step['agent']??''));
+        $task=trim((string)($step['action']??''));
+        if($task===''||$agent==='Business Owner') continue;
+        $steps[]=['step_number'=>count($steps)+1,'agent'=>$agent,'action'=>$task,'execution_allowed'=>$globalApproval===null&&(bool)($step['execution_allowed']??false)];
     }
-    $plan['steps'] = $normalised;
-    return $plan;
-}
-
-function rainbow_product_manager_required(string $command, array $plan): bool
-{
-    $agents=$plan['required_agents']??[];
-    if(is_array($agents)){
-        foreach($agents as $agent){
-            $name=strtolower(trim((string)$agent));
-            if(in_array($name,['product manager','product','product specialist','product management'],true)) return true;
+    foreach($steps as $step){
+        if(!rainbow_task_respects_context($context,(string)$step['action'])){
+            $steps=[['step_number'=>1,'agent'=>'Project Manager','action'=>$command,'execution_allowed'=>$globalApproval===null]];
+            break;
         }
     }
-    return (bool)preg_match('/\b(product|feature|roadmap|requirement|requirements|user story|user stories|acceptance criteria|mvp|launch scope|prioriti[sz]e|backlog|ux flow|customer journey|pricing plan|subscription plan)\b/i',$command);
-}
 
-function rainbow_activate_product_manager(array $plan): array
-{
-    $agents=$plan['required_agents']??[];
-    if(!is_array($agents)) $agents=[];
-    $normalisedAgents=[];
-    foreach($agents as $agent){
-        $name=trim((string)$agent);
-        if($name==='' || strcasecmp($name,'Product Manager')===0 || strcasecmp($name,'Product')===0 || strcasecmp($name,'Product Specialist')===0 || strcasecmp($name,'Product Management')===0) continue;
-        $normalisedAgents[]=$name;
+    $forceExecute=(bool)preg_match('/\b(execute|produce(?: the)? deliverable|completed|create|write|design|revise|proofread|do not create another plan|now)\b/i',$command);
+    if($forceExecute&&$globalApproval===null&&count($steps)===0){
+        $agent='Project Manager';
+        if(preg_match('/\bcontent writer\b/i',$command))$agent='Content Writer';
+        elseif(preg_match('/\beditor|proofreader\b/i',$command))$agent='Editor / Proofreader';
+        elseif(preg_match('/\bcurriculum designer\b/i',$command))$agent='Curriculum Designer';
+        elseif(preg_match('/\bcover designer|creative planner\b/i',$command))$agent='Cover Designer / Creative Planner';
+        elseif(preg_match('/\blayout|publishing specialist\b/i',$command))$agent='Layout / Publishing Specialist';
+        $steps[]=['step_number'=>1,'agent'=>$agent,'action'=>$command,'execution_allowed'=>true];
     }
-    $insertAt=(isset($normalisedAgents[0]) && strcasecmp($normalisedAgents[0],'Business Owner')===0)?1:0;
-    array_splice($normalisedAgents,$insertAt,0,['Product Manager']);
-    $plan['required_agents']=array_values(array_unique($normalisedAgents));
 
-    $steps=$plan['steps']??[];
-    if(!is_array($steps)) $steps=[];
-    $owner=[];$other=[];
-    foreach($steps as $step){
-        if(!is_array($step)) continue;
-        $agent=(string)($step['agent']??'');
-        if(strcasecmp($agent,'Business Owner')===0){$owner[]=$step;continue;}
-        if(in_array(strtolower(trim($agent)),['product manager','product','product specialist','product management'],true)) continue;
-        $other[]=$step;
+    if($globalApproval!==null){
+        $blocked=rainbow_run_agent($context,'Project Manager',$command,$prior);
+        $executions[]=$blocked;
+        $steps=[['step_number'=>1,'agent'=>$blocked['agent'],'action'=>$command,'execution_allowed'=>false]];
+    }else{
+        foreach(array_slice($steps,0,4) as $step){
+            if(!$forceExecute&&empty($step['execution_allowed'])) continue;
+            $execution=rainbow_run_agent($context,$step['agent'],$step['action'],$prior);
+            $executions[]=$execution;
+            if($execution['status']==='completed')$prior[]=['execution_id'=>$execution['execution_id'],'agent'=>$execution['agent'],'task'=>$execution['task'],'output'=>$execution['output']];
+            if($execution['status']!=='completed') break;
+        }
     }
-    $pmStep=[
-        'step_number'=>0,
-        'agent'=>'Product Manager',
-        'action'=>'Translate the objective into product requirements, target-user outcome, prioritized scope, acceptance criteria, dependencies and measurable success criteria before downstream work is planned.',
-        'execution_allowed'=>false,
-    ];
-    $merged=array_merge($owner,[$pmStep],$other);
-    foreach($merged as $i=>&$step){$step['step_number']=$i+1;$step['execution_allowed']=false;} unset($step);
-    $plan['steps']=$merged;
-    return $plan;
-}
 
-try{
-    $result=rainbow_openai_request($command);
-    $plan=rainbow_activate_business_owner($result['plan']);
-    $productActive=rainbow_product_manager_required($command,$plan);
-    if($productActive) $plan=rainbow_activate_product_manager($plan);
+    $plan['steps']=$steps;
+    $plan['required_agents']=array_values(array_unique(array_merge(['Business Owner'],array_column($steps,'agent'))));
+    $plan['approvals_required']=$globalApproval!==null?[['type'=>$globalApproval,'reason'=>'External or sensitive action is approval-gated and was not executed.']]:[];
+    $statuses=array_column($executions,'status');
+    $state=in_array('failed',$statuses,true)?'failed':(in_array('blocked_for_approval',$statuses,true)?'blocked_for_approval':(count($executions)>0&&count(array_filter($statuses,static fn($s)=>$s==='completed'))===count($executions)?'completed':'planned'));
     rainbow_json([
-        'ok'=>true,
-        'state'=>'success',
-        'execution_performed'=>false,
-        'orchestrator'=>[
-            'name'=>'Business Owner',
-            'status'=>'active',
-            'mode'=>'approval_first',
-            'scope'=>'planning_routing_and_risk_control',
-            'external_execution'=>false,
-        ],
-        'specialists'=>[
-            ['name'=>'Product Manager','status'=>$productActive?'active':'ready','mode'=>'planning_only','scope'=>'product_strategy_requirements_prioritization_acceptance_criteria','external_execution'=>false]
-        ],
-        'plan'=>$plan,
+        'ok'=>true,'state'=>$state,'execution_performed'=>in_array('completed',$statuses,true),
+        'context'=>$context,'plan'=>$plan,'executions'=>$executions,
+        'orchestrator'=>['name'=>'Business Owner','status'=>'completed','mode'=>'planner','external_execution'=>false],
+        'specialists'=>array_map(static fn(array $e):array=>['name'=>$e['agent'],'status'=>$e['status'],'execution_id'=>$e['execution_id']],$executions),
         'meta'=>['response_id'=>$result['response_id'],'model'=>$result['model']]
     ]);
 }catch(RuntimeException $e){
     $code=$e->getMessage();
-    $map=[
-        'openai_not_configured'=>[503,'OpenAI is not configured on the server.'],
-        'curl_unavailable'=>[503,'Server HTTP client is unavailable.'],
-        'openai_auth_error'=>[502,'OpenAI rejected the server credentials.'],
-        'openai_rate_limited'=>[429,'OpenAI rate limit reached. Try again shortly.'],
-        'openai_network_error'=>[504,'Could not reach OpenAI. Try again shortly.'],
-        'openai_upstream_error'=>[502,'OpenAI is temporarily unavailable.'],
-        'openai_request_error'=>[502,'OpenAI rejected the request.'],
-        'openai_invalid_response'=>[502,'OpenAI returned an invalid response.'],
-        'openai_incomplete_response'=>[502,'OpenAI response was incomplete. Please retry the command.'],
-        'openai_empty_response'=>[502,'OpenAI returned no plan.'],
-        'openai_invalid_json'=>[502,'OpenAI returned malformed plan data.'],
-        'openai_schema_mismatch'=>[502,'OpenAI returned a plan that failed validation.']
-    ];
-    [$status,$message]=$map[$code]??[500,'Rainbow AI could not prepare the plan.'];
-    rainbow_json(['ok'=>false,'code'=>$code,'state'=>'failure','message'=>$message],$status);
+    $status=in_array($code,['openai_rate_limited'],true)?429:(str_contains($code,'storage')||str_contains($code,'persist')?503:502);
+    $safe=['openai_not_configured'=>'OpenAI is not configured on the server.','openai_auth_error'=>'OpenAI rejected the server credentials.','openai_rate_limited'=>'OpenAI rate limit reached. Try again shortly.','openai_network_error'=>'Could not reach OpenAI. Try again shortly.','openai_upstream_error'=>'OpenAI is temporarily unavailable.','openai_request_error'=>'OpenAI rejected the request.','openai_invalid_response'=>'OpenAI returned an invalid response.','openai_incomplete_response'=>'OpenAI response was incomplete. Please retry.','openai_empty_response'=>'OpenAI returned no output.','openai_invalid_json'=>'OpenAI returned malformed planning data.','openai_schema_mismatch'=>'OpenAI planning data failed validation.','execution_storage_unavailable'=>'Secure execution storage is unavailable.','execution_persist_failed'=>'Execution output could not be stored.'];
+    rainbow_json(['ok'=>false,'code'=>$code,'state'=>'failed','message'=>$safe[$code]??'Rainbow AI execution failed safely.'],$status);
 }
