@@ -201,6 +201,63 @@ function rainbow_execution_dir(): string
     return $dir;
 }
 
+function rainbow_workflow_dir(): string
+{
+    $dir=rainbow_private_root().'/rainbow-workflows';
+    if(!is_dir($dir)&&!mkdir($dir,0750,true)&&!is_dir($dir)) throw new RuntimeException('execution_storage_unavailable');
+    return $dir;
+}
+
+function rainbow_workflow_file(string $id): string
+{
+    if(!preg_match('/^rw_[a-f0-9]{24}$/',$id)) throw new RuntimeException('workflow_id_invalid');
+    return rainbow_workflow_dir().'/'.$id.'.json';
+}
+
+function rainbow_save_workflow(array $workflow): void { rainbow_atomic_json_write(rainbow_workflow_file((string)($workflow['workflow_id']??'')),$workflow); }
+
+function rainbow_load_workflow(string $id): array
+{
+    $file=rainbow_workflow_file($id);$workflow=is_file($file)?json_decode((string)file_get_contents($file),true):null;
+    if(!is_array($workflow)) throw new RuntimeException('workflow_not_found');
+    return $workflow;
+}
+
+function rainbow_book_workflow_tasks(string $projectId): array
+{
+    $suffix=' Preserve Project ID '.$projectId.'. Produce the complete deliverable now. Do not create another plan. Do not publish or modify external systems.';
+    return [
+        ['agent'=>'Editor / Proofreader','task'=>'Edit and finalize YTC Library Chapters 4 and 5. Correct factual, cultural, grammar, pronunciation and answer-key errors, including family terminology and present-simple answers.'.$suffix],
+        ['agent'=>'Content Writer','task'=>'Write complete YTC Library Chapters 6 to 8: Free Time and Hobbies, Food and Ordering, and Shopping and Prices. Include vocabulary, dialogues, pronunciation, exercises, answer keys and instructor notes for beginner Indian learners.'.$suffix],
+        ['agent'=>'Editor / Proofreader','task'=>'Edit and finalize the stored YTC Library Chapters 6 to 8 line by line for accuracy, clarity, cultural fit and answer-key correctness.'.$suffix],
+        ['agent'=>'Content Writer','task'=>'Write complete YTC Library Chapters 9 and 10 plus Pronunciation Guide and Speaking Strategies: Directions and Locations, Making Plans, core sound practice, fillers and repair phrases. Include exercises and answer keys.'.$suffix],
+        ['agent'=>'Editor / Proofreader','task'=>'Edit and finalize the stored YTC Library Chapters 9 and 10, Pronunciation Guide and Speaking Strategies for beginner accuracy and consistency.'.$suffix],
+        ['agent'=>'Curriculum Designer','task'=>'Create the remaining book components for the 30-page YTC Library book: roleplay scripts, listening-repeat exercises, common Q&A, quick grammar reference, assessment rubric, continued-practice tips, instructor notes and concise glossary. Verify alignment with Chapters 1 to 10.'.$suffix],
+        ['agent'=>'Cover Designer / Creative Planner','task'=>'Produce a finished cover specification for the YTC Library Basic English Speaking book, including exact front-cover text, subtitle, visual concept, colours, typography, back-cover copy, copyright placeholders, MRP and recommended introductory selling price. Planning only; do not create claims or publish.'.$suffix],
+        ['agent'=>'Layout / Publishing Specialist','task'=>'Create the final internal layout and production specification for assembling the stored edited manuscript into a 30-page book, including exact page map, cover placement, contents, typography, image placeholders, credits, pricing placement, PDF quality checklist and preflight acceptance report. Do not publish or upload.'.$suffix],
+    ];
+}
+
+function rainbow_start_book_workflow(array $context,string $command): array
+{
+    if((string)$context['project_id']!=='ytc-library-71e2e736') throw new RuntimeException('auto_mode_project_unsupported');
+    $workflow=['workflow_id'=>'rw_'.bin2hex(random_bytes(12)),'project_id'=>$context['project_id'],'project_name'=>$context['project_name'],'objective'=>$command,'status'=>'running','cursor'=>0,'tasks'=>rainbow_book_workflow_tasks((string)$context['project_id']),'execution_ids'=>[],'created_at'=>gmdate('c'),'completed_at'=>null,'error'=>null];
+    rainbow_save_workflow($workflow);return $workflow;
+}
+
+function rainbow_advance_workflow(array $workflow,array $context): array
+{
+    if(($workflow['status']??'')!=='running') return ['workflow'=>$workflow,'execution'=>null];
+    $cursor=(int)($workflow['cursor']??0);$tasks=is_array($workflow['tasks']??null)?$workflow['tasks']:[];
+    if(!isset($tasks[$cursor])||!is_array($tasks[$cursor])){$workflow['status']='completed';$workflow['completed_at']=gmdate('c');rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>null];}
+    $task=$tasks[$cursor];
+    if(rainbow_external_approval_reason((string)$task['task'])!==null){$workflow['status']='blocked_for_approval';$workflow['error']='workflow_task_requires_approval';rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>null];}
+    $execution=rainbow_run_agent($context,(string)$task['agent'],(string)$task['task'],rainbow_recent_project_outputs((string)$workflow['project_id'],4));
+    if($execution['status']==='completed'){$workflow['execution_ids'][]=$execution['execution_id'];$workflow['cursor']=$cursor+1;if($workflow['cursor']>=count($tasks)){$workflow['status']='completed';$workflow['completed_at']=gmdate('c');}}
+    else{$workflow['status']=$execution['status']==='blocked_for_approval'?'blocked_for_approval':'failed';$workflow['error']=$execution['error']??'execution_failed';}
+    rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>$execution];
+}
+
 function rainbow_safe_id(string $value): string
 {
     $value=strtolower(trim($value));
