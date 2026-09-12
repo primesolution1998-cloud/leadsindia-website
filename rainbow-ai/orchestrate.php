@@ -22,6 +22,15 @@ if(preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/u',$command)) rainbow_json(['ok'=>f
 
 try{
     $context=rainbow_build_context($command);
+    $autoMode=(bool)($body['auto_mode']??false);
+    $workflowId=trim((string)($body['workflow_id']??''));
+    if($autoMode){
+        $workflow=$workflowId!==''?rainbow_load_workflow($workflowId):rainbow_start_book_workflow($context,$command);
+        if(!hash_equals((string)$context['project_id'],(string)$workflow['project_id'])) throw new RuntimeException('workflow_project_mismatch');
+        $advanced=rainbow_advance_workflow($workflow,$context);$workflow=$advanced['workflow'];$execution=$advanced['execution'];$runs=is_array($execution)?[$execution]:[];
+        $workflowSteps=array_map(static fn(array $t,int $i):array=>['step_number'=>$i+1,'agent'=>$t['agent'],'action'=>$t['task'],'execution_allowed'=>true],$workflow['tasks'],array_keys($workflow['tasks']));
+        rainbow_json(['ok'=>true,'state'=>$workflow['status']==='running'?'running':$workflow['status'],'execution_performed'=>is_array($execution)&&$execution['status']==='completed','context'=>$context,'plan'=>['goal'=>$workflow['objective'],'required_agents'=>array_values(array_unique(array_column($workflow['tasks'],'agent'))),'steps'=>$workflowSteps,'missing_information'=>[],'risk_level'=>'low','approvals_required'=>[]],'executions'=>$runs,'auto_workflow'=>['workflow_id'=>$workflow['workflow_id'],'status'=>$workflow['status'],'completed_steps'=>$workflow['cursor'],'total_steps'=>count($workflow['tasks']),'tasks'=>$workflow['tasks'],'error'=>$workflow['error']],'orchestrator'=>['name'=>'Business Owner','status'=>'completed','mode'=>'auto','external_execution'=>false],'specialists'=>array_map(static fn(array $e):array=>['name'=>$e['agent'],'status'=>$e['status'],'execution_id'=>$e['execution_id']],$runs),'meta'=>['response_id'=>null,'model'=>rainbow_openai_model()]]);
+    }
     // Planning and safety routing are deterministic and local. Only the specialist
     // executor calls OpenAI, keeping production requests inside hosting limits.
     $plan=rainbow_local_plan($context,$command);
