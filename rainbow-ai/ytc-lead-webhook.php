@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/lib/rainbow-ai.php';
 require dirname(__DIR__) . '/lib/rainbow-whatsapp.php';
+require dirname(__DIR__) . '/lib/rainbow-whatsapp-followup.php';
 rainbow_load_private_env();
 
 header('Content-Type: application/json; charset=utf-8');
@@ -49,6 +50,18 @@ if ($name === '' || $mobile === '') {
     exit;
 }
 
+$tracking = rainbow_whatsapp_followup_register(['phone'=>$mobile,'lead_id'=>$leadId,'name'=>$name,'source'=>$source]);
+if (($tracking['code'] ?? '') === 'duplicate') {
+    http_response_code(202);
+    echo json_encode(['ok'=>true,'code'=>'duplicate_suppressed'], JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+    exit;
+}
+if (!($tracking['ok'] ?? false)) {
+    http_response_code(($tracking['code'] ?? '') === 'opted_out' ? 202 : 500);
+    echo json_encode($tracking, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $template = trim((string)(getenv('WHATSAPP_YTC_LEAD_TEMPLATE') ?: 'ytc_lead_welcome'));
 $language = trim((string)(getenv('WHATSAPP_YTC_LEAD_TEMPLATE_LANGUAGE') ?: 'en')) ?: 'en';
 $components = [[
@@ -68,6 +81,7 @@ $result = rainbow_whatsapp_queue([
     'source'=>'ytc_sheet_lead',
     'meta'=>['lead_id'=>$leadId,'name'=>$name,'source'=>$source],
 ]);
+if (!($result['ok'] ?? false) && !empty($tracking['file'])) @unlink((string)$tracking['file']);
 
 rainbow_whatsapp_log(['event'=>'ytc_lead_ingested','lead_id'=>$leadId,'name'=>$name,'to'=>$mobile,'source'=>$source,'queue_ok'=>$result['ok']??false]);
 http_response_code(($result['ok'] ?? false) ? 202 : 500);

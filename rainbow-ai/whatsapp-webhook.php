@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require dirname(__DIR__) . '/lib/rainbow-ai.php';
 require dirname(__DIR__) . '/lib/rainbow-whatsapp.php';
+require dirname(__DIR__) . '/lib/rainbow-whatsapp-followup.php';
 rainbow_load_private_env();
 
 header('Content-Type: text/plain; charset=utf-8');

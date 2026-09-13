@@ -113,7 +113,8 @@ function rainbow_whatsapp_process_webhook(array $event): array
     foreach(($event['entry']??[]) as $entry) foreach(($entry['changes']??[]) as $change){$value=$change['value']??[];
         foreach(($value['statuses']??[]) as $status){$statuses++;rainbow_whatsapp_log(['event'=>'delivery_status','message_id'=>(string)($status['id']??''),'status'=>(string)($status['status']??''),'recipient'=>(string)($status['recipient_id']??''),'timestamp'=>(string)($status['timestamp']??'')]);}
         foreach(($value['messages']??[]) as $message){$from=rainbow_whatsapp_normalize_phone((string)($message['from']??''));$messageId=(string)($message['id']??'');$type=(string)($message['type']??'');rainbow_whatsapp_log(['event'=>'inbound','message_id'=>$messageId,'from'=>$from,'type'=>$type]);
-            if($from!=='' && rainbow_whatsapp_enabled()){$reply=trim((string)(getenv('WHATSAPP_AUTO_REPLY_TEXT')?:'Thanks for contacting YTC Education. Our team will assist you shortly.'));$q=rainbow_whatsapp_queue(['to'=>$from,'type'=>'text','text'=>$reply,'source'=>'inbound_auto_reply','meta'=>['in_reply_to'=>$messageId]]);if($q['ok'])$queued++;}
+            $allowAutoReply=true;if(function_exists('rainbow_whatsapp_followup_handle_inbound')){$allowAutoReply=rainbow_whatsapp_followup_handle_inbound($message);}
+            if($from!=='' && $allowAutoReply && rainbow_whatsapp_enabled()){$reply=trim((string)(getenv('WHATSAPP_AUTO_REPLY_TEXT')?:'Thanks for contacting YTC Education. Our team will assist you shortly.'));$q=rainbow_whatsapp_queue(['to'=>$from,'type'=>'text','text'=>$reply,'source'=>'inbound_auto_reply','meta'=>['in_reply_to'=>$messageId]]);if($q['ok'])$queued++;}
         }
     }
     return ['ok'=>true,'queued_replies'=>$queued,'statuses'=>$statuses];
