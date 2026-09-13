@@ -23,7 +23,26 @@ $dispatch = rainbow_whatsapp_dispatch_pending(5);
 wa_expect(($dispatch['sent'] ?? -1) === 0, 'Disabled automation must not send');
 wa_expect(($dispatch['skipped'] ?? 0) >= 1, 'Disabled automation must report skipped queue');
 
-$event = ['entry'=>[['changes'=>[['value'=>['statuses'=>[['id'=>'wamid.test','status'=>'delivered','recipient_id'=>'919876543210','timestamp'=>'1']],'messages'=>[['from'=>'919876543210','id'=>'wamid.in','type'=>'text','text'=>['body'=>'Hi']]]]]]]]]];
+$event = [
+    'entry' => [[
+        'changes' => [[
+            'value' => [
+                'statuses' => [[
+                    'id' => 'wamid.test',
+                    'status' => 'delivered',
+                    'recipient_id' => '919876543210',
+                    'timestamp' => '1',
+                ]],
+                'messages' => [[
+                    'from' => '919876543210',
+                    'id' => 'wamid.in',
+                    'type' => 'text',
+                    'text' => ['body' => 'Hi'],
+                ]],
+            ],
+        ]],
+    ]],
+];
 $processed = rainbow_whatsapp_process_webhook($event);
 wa_expect(($processed['ok'] ?? false) === true, 'Webhook event must process');
 wa_expect(($processed['statuses'] ?? 0) === 1, 'Delivery status must be counted');
