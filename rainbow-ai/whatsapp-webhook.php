@@ -9,7 +9,7 @@ rainbow_load_private_env();
 
 header('Content-Type: text/plain; charset=utf-8');
 header('Cache-Control: no-store');
-header('X-Content-Type-Options', 'nosniff');
+header('X-Content-Type-Options: nosniff');
 
 $verifyToken = trim((string)(getenv('WHATSAPP_VERIFY_TOKEN') ?: ''));
 
