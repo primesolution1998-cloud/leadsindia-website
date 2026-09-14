@@ -14,5 +14,7 @@ jobs:
         run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Rainbow AI execution tests
         run: php tests/rainbow-ai-test.php
+      - name: Rainbow overnight worker tests
+        run: php tests/rainbow-overnight-test.php
       - name: Rainbow WhatsApp automation tests
         run: php tests/rainbow-whatsapp-test.php
