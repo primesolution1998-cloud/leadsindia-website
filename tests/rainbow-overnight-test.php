@@ -85,4 +85,22 @@ try {
     overnight_expect($e->getMessage() === 'overnight_queue_invalid', 'unexpected_corrupt_queue_error');
 }
 
-echo "PASS queue_locking\nPASS reconcile_preserves_enqueue\nPASS cancellation_wins\nPASS corrupt_queue_fails_closed\n";
+// Structurally invalid entries must also fail closed; never silently filter them out.
+file_put_contents(rainbow_overnight_queue_file(), json_encode([overnight_job($idA), 'invalid-entry']));
+try {
+    rainbow_overnight_read_queue();
+    overnight_expect(false, 'scalar_queue_entry_was_accepted');
+} catch (RuntimeException $e) {
+    overnight_expect($e->getMessage() === 'overnight_queue_invalid', 'unexpected_scalar_queue_error');
+}
+
+// Duplicate job IDs create reconciliation ambiguity and must be rejected.
+file_put_contents(rainbow_overnight_queue_file(), json_encode([overnight_job($idA), overnight_job($idA)]));
+try {
+    rainbow_overnight_read_queue();
+    overnight_expect(false, 'duplicate_job_id_was_accepted');
+} catch (RuntimeException $e) {
+    overnight_expect($e->getMessage() === 'overnight_queue_invalid', 'unexpected_duplicate_job_error');
+}
+
+echo "PASS queue_locking\nPASS reconcile_preserves_enqueue\nPASS cancellation_wins\nPASS corrupt_queue_fails_closed\nPASS invalid_entry_fails_closed\nPASS duplicate_job_id_fails_closed\n";
