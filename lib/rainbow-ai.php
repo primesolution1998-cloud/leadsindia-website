@@ -30,7 +30,7 @@ function rainbow_bootstrap(): void
 
 function rainbow_load_private_env(): void
 {
-    $path = dirname(dirname(__DIR__)) . '/leadsindia-private/.rainbow-ai.env';
+    $path = (string)(getenv('RAINBOW_ENV_FILE') ?: dirname(dirname(__DIR__)) . '/leadsindia-private/.rainbow-ai.env');
     if (!is_readable($path)) return;
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if ($lines === false) return;
@@ -184,6 +184,7 @@ function rainbow_openai_request(string $command): array
 function rainbow_private_root(): string
 {
     $docRoot=rtrim((string)($_SERVER['DOCUMENT_ROOT']??dirname(__DIR__)),'/\\');
+    if($docRoot==='') $docRoot=dirname(__DIR__);
     $dir=dirname($docRoot).'/leadsindia-private';
     if(!is_dir($dir)) @mkdir($dir,0750,true);
     if(!is_dir($dir)||!is_writable($dir)){
@@ -266,7 +267,19 @@ function rainbow_advance_workflow_locked(array $workflow,array $context): array
     if(!isset($tasks[$cursor])||!is_array($tasks[$cursor])){$workflow['status']='completed';$workflow['completed_at']=gmdate('c');rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>null];}
     $task=$tasks[$cursor];
     if(rainbow_external_approval_reason((string)$task['task'])!==null){$workflow['status']='blocked_for_approval';$workflow['error']='workflow_task_requires_approval';rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>null];}
-    $execution=rainbow_run_agent($context,(string)$task['agent'],(string)$task['task'],rainbow_recent_project_outputs((string)$workflow['project_id'],4));
+    $prior=rainbow_recent_project_outputs((string)$workflow['project_id'],4);
+    if(isset($workflow['book_spec'])){
+        $prior=[];
+        $ids=$workflow['execution_ids']??[];
+        if($ids){
+            $last=$ids[array_key_last($ids)];
+            if(!is_string($last)||!preg_match('/^rx_[a-f0-9]{24}$/',$last)) throw new RuntimeException('book_handoff_invalid');
+            $record=json_decode((string)file_get_contents(rainbow_execution_dir().'/'.$last.'.json'),true);
+            if(!is_array($record)||($record['project_id']??'')!==$workflow['project_id']||($record['status']??'')!=='completed') throw new RuntimeException('book_handoff_invalid');
+            $prior[]=$record;
+        }
+    }
+    $execution=rainbow_run_agent($context,(string)$task['agent'],(string)$task['task'],$prior);
     if($execution['status']==='completed'){$workflow['execution_ids'][]=$execution['execution_id'];$workflow['cursor']=$cursor+1;if($workflow['cursor']>=count($tasks)){$workflow['status']='completed';$workflow['completed_at']=gmdate('c');}}
     else{$workflow['status']=$execution['status']==='blocked_for_approval'?'blocked_for_approval':'failed';$workflow['error']=$execution['error']??'execution_failed';}
     rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>$execution];

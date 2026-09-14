@@ -10,6 +10,8 @@ $calls=0;
 $GLOBALS['rainbow_test_executor']=static function()use(&$calls):array{$calls++;return ['output'=>'Complete test content','response_id'=>'mock'];};
 $ctx=rainbow_build_context('YTC Library project. Write a book.');
 $flow=rainbow_start_book_workflow($ctx,'Complete internal manuscript.');
+putenv('RAINBOW_WORKER_DAILY_CALL_LIMIT=20');
+putenv('RAINBOW_WORKER_WORKFLOW_IDS='.$flow['workflow_id']);
 $r=rainbow_worker_tick();
 check($r['advanced']===1&&$calls===1,'worker must execute one stage');
 check(rainbow_load_workflow($flow['workflow_id'])['cursor']===1,'cursor persists');
@@ -27,6 +29,7 @@ check(rainbow_load_workflow($flow['workflow_id'])['status']==='completed','workf
 check($calls===8,'unexpected extra API executions');
 rainbow_worker_tick();check($calls===8,'completed task rerun');
 $flow=rainbow_start_book_workflow($ctx,'Second manuscript.');
+putenv('RAINBOW_WORKER_WORKFLOW_IDS='.$flow['workflow_id']);
 $GLOBALS['rainbow_test_executor']=static function():array{throw new RuntimeException('openai_incomplete_response');};
 $r=rainbow_worker_tick();check($r['failed']===1,'failure not recorded');
 check(rainbow_load_workflow($flow['workflow_id'])['cursor']===0,'failed stage advanced');
@@ -35,3 +38,11 @@ $lock=fopen(rainbow_private_root().'/rainbow-worker.lock','c');flock($lock,LOCK_
 check((rainbow_worker_tick()['busy']??false)===true,'scheduler overlap allowed');
 flock($lock,LOCK_UN);fclose($lock);
 echo "PASS: bounded execution, persistence, stale reads, locks, context isolation, completion, failure stop.\n";
+putenv('RAINBOW_WORKER_WORKFLOW_IDS');
+check((rainbow_worker_tick()['code']??'')==='worker_configuration_required','unselected jobs ran');
+$flow=rainbow_start_book_workflow($ctx,'Budget test.');
+putenv('RAINBOW_WORKER_WORKFLOW_IDS='.$flow['workflow_id']);
+putenv('RAINBOW_WORKER_DAILY_CALL_LIMIT=1');
+check((rainbow_worker_tick()['code']??'')==='daily_call_limit_reached','budget exceeded');
+check(rainbow_load_workflow($flow['workflow_id'])['cursor']===0,'capped workflow advanced');
+echo "PASS: explicit selection and daily API call cap.\n";
