@@ -247,6 +247,20 @@ function rainbow_start_book_workflow(array $context,string $command): array
 
 function rainbow_advance_workflow(array $workflow,array $context): array
 {
+    $id=(string)($workflow['workflow_id']??'');
+    $file=rainbow_workflow_file($id);
+    $lock=fopen($file.'.lock','c');
+    if($lock===false) throw new RuntimeException('workflow_lock_unavailable');
+    if(!flock($lock,LOCK_EX|LOCK_NB)){fclose($lock);throw new RuntimeException('workflow_busy');}
+    try{
+        $fresh=rainbow_load_workflow($id);
+        if(($fresh['project_id']??null)!==($context['project_id']??null)) throw new RuntimeException('workflow_project_mismatch');
+        return rainbow_advance_workflow_locked($fresh,$context);
+    }finally{flock($lock,LOCK_UN);fclose($lock);}
+}
+
+function rainbow_advance_workflow_locked(array $workflow,array $context): array
+{
     if(($workflow['status']??'')!=='running') return ['workflow'=>$workflow,'execution'=>null];
     $cursor=(int)($workflow['cursor']??0);$tasks=is_array($workflow['tasks']??null)?$workflow['tasks']:[];
     if(!isset($tasks[$cursor])||!is_array($tasks[$cursor])){$workflow['status']='completed';$workflow['completed_at']=gmdate('c');rainbow_save_workflow($workflow);return ['workflow'=>$workflow,'execution'=>null];}
@@ -436,6 +450,7 @@ function rainbow_openai_executor(array $context,string $agent,string $task,array
     if($http===401||$http===403) throw new RuntimeException('openai_auth_error');
     if($http===429) throw new RuntimeException('openai_rate_limited');
     if($http<200||$http>=300) throw new RuntimeException($http>=500?'openai_upstream_error':'openai_request_error');
+    if(($decoded['status']??'')!=='completed') throw new RuntimeException('openai_incomplete_response');
     $output=rainbow_normalize_deliverable(rainbow_extract_output_text($decoded));if($output==='') throw new RuntimeException('openai_empty_response');
     return ['output'=>$output,'response_id'=>is_string($decoded['id']??null)?$decoded['id']:null];
 }
