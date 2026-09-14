@@ -24,7 +24,17 @@ function rainbow_overnight_decode_queue(string $queueFile): array
     if ($raw === false || trim($raw) === '') return [];
     $decoded = json_decode($raw, true);
     if (!is_array($decoded)) throw new RuntimeException('overnight_queue_invalid');
-    return array_values(array_filter($decoded, 'is_array'));
+
+    $seen = [];
+    foreach ($decoded as $job) {
+        if (!is_array($job)) throw new RuntimeException('overnight_queue_invalid');
+        $jobId = (string)($job['job_id'] ?? '');
+        if (!preg_match('/^rj_[a-f0-9]{24}$/', $jobId)) throw new RuntimeException('overnight_queue_invalid');
+        if (isset($seen[$jobId])) throw new RuntimeException('overnight_queue_invalid');
+        $seen[$jobId] = true;
+    }
+
+    return array_values($decoded);
 }
 
 function rainbow_overnight_read_queue(): array
