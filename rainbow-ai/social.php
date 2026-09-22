@@ -3,6 +3,10 @@
 declare(strict_types=1);
 require dirname(__DIR__) . '/lib/rainbow-social.php';
 rainbow_bootstrap();
+if (!rainbow_admin_logged_in()) {
+    header('Location: /rainbow-ai/login.php', true, 302);
+    exit;
+}
 $csrf = rainbow_csrf_token();
 ?><!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rainbow Social Command Center</title>
