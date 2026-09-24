@@ -28,7 +28,7 @@ function rainbow_route_loan_agent(string $command): ?string
         if (preg_match('/\bact as\s+(?:the\s+)?'.preg_quote($name, '/').'\b/i', $command)) return $name;
     }
     // Domain guard prevents generic education/content tasks from becoming loan tasks.
-    if (!preg_match('/\b(loan|loans|lending|credit|cibil|emi|bank|banks|nbfc|government|govt|assan\s?loan|mudra|pmegp|subsidy|subsidies)\b|कर्ज|ऋण/u', $command)) return null;
+    if (!preg_match('/\b(loan|loans|lending|credit|cibil|emi|bank|banks|nbfc|government|govt|assan\s?loan|mudra|pmegp|subsidy|subsidies)\b|कर्ज|ऋण/iu', $command)) return null;
     $routes = [
         'Government Scheme Expert' => '/\b(government|govt|gov|scheme|schemes|yojana|mudra|pmegp|subsidy|subsidies)\b|सरकारी|योजना/iu',
         'Bank Policy Expert' => '/\b(bank|nbfc|lender)\b.*\b(policy|policies|criteria|compare|comparison)\b|\b(policy|policies)\b/i',
