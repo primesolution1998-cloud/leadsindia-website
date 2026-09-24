@@ -16,3 +16,5 @@ jobs:
         run: php tests/rainbow-ai-test.php
       - name: Rainbow WhatsApp automation tests
         run: php tests/rainbow-whatsapp-test.php
+      - name: Rainbow loan specialist tests
+        run: php tests/rainbow-loans-test.php
