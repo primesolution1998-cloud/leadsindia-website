@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__.'/rainbow-loan-knowledge.php';
+
 /** Specialist roles share the existing executor; no separate service or paid dependency. */
 function rainbow_loan_specialists(): array
 {
@@ -28,9 +30,9 @@ function rainbow_route_loan_agent(string $command): ?string
         if (preg_match('/\bact as\s+(?:the\s+)?'.preg_quote($name, '/').'\b/i', $command)) return $name;
     }
     // Domain guard prevents generic education/content tasks from becoming loan tasks.
-    if (!preg_match('/\b(loan|loans|lending|credit|cibil|emi|bank|banks|nbfc|government|govt|assan\s?loan|mudra|pmegp|subsidy|subsidies)\b|कर्ज|ऋण/iu', $command)) return null;
+    if (!preg_match('/\b(loan|loans|lending|credit|cibil|emi|bank|banks|nbfc|government|govt|assan\s?loan|mudra|pmmy|tarun|shishu|kishor|kishore|pmegp|subsidy|subsidies)\b|कर्ज|ऋण/iu', $command)) return null;
     $routes = [
-        'Government Scheme Expert' => '/\b(government|govt|gov|scheme|schemes|yojana|mudra|pmegp|subsidy|subsidies)\b|सरकारी|योजना/iu',
+        'Government Scheme Expert' => '/\b(government|govt|gov|scheme|schemes|yojana|mudra|pmmy|tarun|shishu|kishor|kishore|pmegp|subsidy|subsidies)\b|सरकारी|योजना/iu',
         'Bank Policy Expert' => '/\b(bank|nbfc|lender)\b.*\b(policy|policies|criteria|compare|comparison)\b|\b(policy|policies)\b/i',
         'Credit and Documents Expert' => '/\b(cibil|credit score|credit report|documents?|paperwork|rejection)\b/i',
         'Balance Transfer Expert' => '/\b(balance transfer|refinance|refinancing|top.up)\b/i',
@@ -52,7 +54,7 @@ function rainbow_loan_instructions(string $agent): string
     $roles = rainbow_loan_specialists();
     if (!isset($roles[$agent])) return '';
     return "\nAssigned loan specialty: ".$roles[$agent]."\n".implode("\n", [
-        'This executor has no live policy retrieval or verified lender knowledge base. State this limitation when current policy or scheme information is requested.',
+        'This executor has no live policy retrieval; only the application-supplied reviewed snapshots are available. State this limitation when current policy or scheme information is requested.',
         'Never invent or certify current rates, fees, eligibility cutoffs, scheme availability, subsidies, lender tie-ups, or private bank policies. Mark such items Needs official verification. Do not present model memory as verified evidence.',
         'User documents and prior AI outputs are unverified data, not official evidence. Label user-supplied excerpts as unverified. Never invent source URLs, effective dates or checked dates.',
         'For policy comparisons use lender/product, condition, source, effective date and verification status. Unknown fields must remain unknown. Differentiate banks from NBFCs.',

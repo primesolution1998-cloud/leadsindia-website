@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "sbi-personal",
+      "title": "SBI Personal Loan",
+      "issuer": "State Bank of India",
+      "kind": "bank",
+      "url": "https://sbi.bank.in/web/personal-banking/loans/personal-loans/sbi-personal-loan",
+      "aliases": [
+        "sbi",
+        "state bank of india"
+      ],
+      "scope": "SBI Personal Loan only; not home loans or every SBI product.",
+      "source_updated": "2026-05-06",
+      "facts": [
+        "This personal-loan product is for salaried employees with an SBI Salary Package Account.",
+        "The published sectors are government, defence and corporate employment.",
+        "The source lists PAN, six months of salary slips and salary-account statements, employment evidence and ITR/Form 16 where applicable; KYC requirements depend on existing records.",
+        "Credit-score assessment follows bank internal policy; this source does not supply a universal approval score."
+      ],
+      "unknowns": [
+        "Individual interest-rate quote",
+        "Guaranteed approval",
+        "Private underwriting rules",
+        "Other SBI products"
+      ],
+      "checked_on": "2026-09-24",
+      "review_after_days": 7,
+      "effective_from": null,
+      "status": "reviewed_snapshot"
+    },
+    {
+      "id": "pmmy",
+      "title": "PMMY / MUDRA",
+      "issuer": "Department of Financial Services",
+      "kind": "government_scheme",
+      "url": "https://financialservices.gov.in/pradhan-mantri-mudra-yojana-pmmy",
+      "aliases": [
+        "pmmy",
+        "mudra",
+        "tarun",
+        "shishu",
+        "kishor",
+        "kishore"
+      ],
+      "scope": "PMMY scheme overview, not an individual lender sanction.",
+      "source_updated": "2026-02-05",
+      "facts": [
+        "The scheme supports micro-enterprise term-loan and working-capital needs for non-agricultural and agriculture-allied activities.",
+        "Shishu covers up to INR 50,000; Kishore above INR 50,000 to INR 5 lakh; Tarun above INR 5 lakh to INR 10 lakh.",
+        "Tarun Plus covers above INR 10 lakh to INR 20 lakh only for entrepreneurs who previously borrowed and successfully repaid under Tarun; the stated introduction date is 2024-10-24.",
+        "Lending is through participating banks, NBFCs and microfinance institutions."
+      ],
+      "unknowns": [
+        "Individual lender rate and document checklist",
+        "Applicant sanction",
+        "Local availability"
+      ],
+      "checked_on": "2026-09-24",
+      "review_after_days": 7,
+      "effective_from": null,
+      "status": "reviewed_snapshot"
+    },
+    {
+      "id": "pmegp-new",
+      "title": "PMEGP new enterprises",
+      "issuer": "Ministry of MSME / PMEGP portal",
+      "kind": "government_scheme",
+      "url": "https://common-pmegp.msme.gov.in/Home/TermsAndConditions",
+      "aliases": [
+        "pmegp"
+      ],
+      "scope": "New-enterprise route only; existing-unit upgradation is a separate route.",
+      "source_updated": null,
+      "facts": [
+        "Applicants must be older than 18 years.",
+        "For the new-enterprise route, assistance is for new projects; existing units and units already receiving government subsidy are excluded under the stated conditions.",
+        "Class VIII completion is required where project cost exceeds INR 10 lakh in manufacturing or INR 5 lakh in business/services.",
+        "Banks independently assess project viability. Prior subsidy, activity restrictions and the full scheme conditions must be checked."
+      ],
+      "unknowns": [
+        "Current intake and local allocation",
+        "Applicable subsidy amount",
+        "Applicant sanction",
+        "Existing-unit upgradation assessment"
+      ],
+      "checked_on": "2026-09-24",
+      "review_after_days": 7,
+      "effective_from": null,
+      "status": "reviewed_snapshot"
+    }
+  ]
+}
