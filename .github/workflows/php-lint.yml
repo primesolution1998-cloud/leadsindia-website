@@ -20,3 +20,5 @@ jobs:
         run: php tests/rainbow-loans-test.php
       - name: Rainbow loan knowledge tests
         run: php tests/rainbow-loan-knowledge-test.php
+      - name: Rainbow loan intake tests
+        run: php tests/rainbow-loan-intake-test.php

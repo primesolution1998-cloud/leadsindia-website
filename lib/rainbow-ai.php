@@ -337,6 +337,9 @@ function rainbow_build_context(string $command): array
     $explicit=rainbow_extract_explicit_project($command);
     $currentId=(string)($_SESSION['rainbow_current_project_id']??'');
     $current=$currentId!==''?rainbow_load_project($currentId):null;
+    if($explicit===null && (!is_array($current) || str_starts_with((string)($current['project_id']??''),'unassigned-')) && rainbow_route_loan_agent($command)!==null){
+        $explicit='AssanLoan';
+    }
     if($explicit!==null){
         $projectName=$explicit;
         $projectId=rainbow_safe_id($projectName).'-'.substr(hash('sha256',strtolower($projectName)),0,8);
@@ -427,6 +430,8 @@ function rainbow_external_approval_reason(string $command): ?string
 
 function rainbow_openai_executor(array $context,string $agent,string $task,array $priorOutputs): array
 {
+    $localAnswer=rainbow_loan_local_answer($agent,$task);
+    if($localAnswer!==null) return ['output'=>$localAnswer,'response_id'=>null];
     if(getenv('RAINBOW_TEST_MODE')==='1'&&isset($GLOBALS['rainbow_test_executor'])&&is_callable($GLOBALS['rainbow_test_executor'])) return ($GLOBALS['rainbow_test_executor'])($context,$agent,$task,$priorOutputs);
     if(!function_exists('curl_init')) throw new RuntimeException('curl_unavailable');
     $key=rainbow_openai_key(); if($key==='') throw new RuntimeException('openai_not_configured');
