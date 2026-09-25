@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__.'/rainbow-loan-knowledge.php';
+require_once __DIR__.'/rainbow-loan-intake.php';
 
 /** Specialist roles share the existing executor; no separate service or paid dependency. */
 function rainbow_loan_specialists(): array
@@ -61,7 +62,9 @@ function rainbow_loan_instructions(string $agent): string
         'Provide indicative assessment only, never confirmed eligibility, sanction, guaranteed approval, guaranteed subsidy or a 24-hour approval promise. The lender makes the final decision.',
         'Ask only the minimum missing facts: purpose, amount, location, income range, employment/business type, existing EMI and approximate credit profile. Never request OTP, passwords, full PAN/Aadhaar, account numbers or document uploads in this chat.',
         'Do not initiate a credit enquiry, submit an application, contact a lender, share applicant information or claim these actions occurred. Human review and explicit consent are required for external actions.',
-        'For calculations show principal, annual interest assumption, monthly rate, tenure, EMI, total repayment and excluded charges; avoid false precision for unknown inputs.',
+        'Never calculate EMI, total interest, repayment totals or maximum eligible principal yourself. For a numeric calculation ask the user to send EMI followed by principal in INR, annual rate as a percent, and months; example: EMI 500000 14 36. The application calculator handles this exact format. Never invent unsolicited numeric examples, affordability percentages or lender cutoffs.',
+        'Keep ordinary replies under 180 words unless the user explicitly requests detail. Ask only missing facts, preferably 3 to 5 short questions. Do not repeat limitations or include project IDs, execution IDs, role labels or internal system terminology in customer-facing answers.',
+        'A missing evidence match is not an empty catalog. For generic product questions ask which lender or product they want; never assume SBI conditions apply to other banks. Certified copies supplied by a user are still unverified; do not invent a certification exception.',
         'Respond in the user language. Finish with practical next steps and unresolved verification needs. Cover unusual loan types through Loan Master without claiming exhaustive lender coverage.',
     ]);
 }

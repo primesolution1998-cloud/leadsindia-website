@@ -35,6 +35,7 @@ if ($adminReady && $authenticated && $curlAvailable) {
 rainbow_json([
     'ok' => true,
     'phase' => 2,
+    'loan_advisory' => ['release'=>'loan-intake-v2','specialists'=>count(rainbow_loan_specialists()),'policy_mode'=>'curated_snapshots_not_live'],
     'openai' => [
         'configured' => $keyConfigured,
         'model' => rainbow_openai_model(),
